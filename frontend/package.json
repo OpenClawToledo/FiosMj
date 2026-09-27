@@ -1,0 +1,19 @@
+{
+  "name": "fiosmj-frontend",
+  "version": "1.0.0",
+  "description": "Frontend da loja Fios MJ - Crochê artesanal",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && npm run copy-images",
+    "copy-images": "node -e \"const fs=require('fs');const path=require('path');const src='../src/main/resources/static/img';if(!fs.existsSync(src))fs.mkdirSync(src,{recursive:true});\"",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}

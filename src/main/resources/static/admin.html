@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Fios MJ — Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #fdf6f0; color: #333; }
+    header { background: #8B4513; color: white; padding: 14px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    header h1 { font-size: 1.1rem; }
+    main { max-width: 1040px; margin: 20px auto; padding: 0 16px 60px; }
+
+    #login-screen { max-width: 360px; margin: 80px auto; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px #0001; }
+    #login-screen h2 { margin-bottom: 20px; color: #8B4513; }
+    input, textarea, select { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 0.95rem; margin-bottom: 12px; font-family: inherit; }
+    textarea { resize: vertical; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #8B4513; }
+    button { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.92rem; }
+    .btn-primary { background: #8B4513; color: white; }
+    .btn-primary:hover { background: #7a3a10; }
+    .btn-danger { background: #e53e3e; color: white; }
+    .btn-success { background: #38a169; color: white; }
+    .btn-sm { padding: 6px 12px; font-size: 0.82rem; }
+    .btn-outline { background: white; border: 1.5px solid #8B4513; color: #8B4513; }
+
+    nav.tabs { display: flex; gap: 6px; margin: 0 0 18px; border-bottom: 2px solid #ecdccf; overflow-x: auto; }
+    nav.tabs button { background: none; border-radius: 8px 8px 0 0; color: #8B4513; padding: 10px 16px; white-space: nowrap; }
+    nav.tabs button.active { background: #8B4513; color: white; }
+
+    .toolbar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+    .toolbar h2 { flex: 1; font-size: 1.1rem; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 6px #0001; overflow: hidden; display: flex; flex-direction: column; }
+    .card img { width: 100%; height: 170px; object-fit: cover; background: #f5e6d8; }
+    .card .info { padding: 14px; flex: 1; }
+    .card .name { font-weight: 600; margin-bottom: 4px; }
+    .card .meta { font-size: 0.8rem; color: #888; margin-bottom: 6px; }
+    .card .price { color: #8B4513; font-weight: 700; }
+    .card .actions { padding: 10px 14px; display: flex; gap: 8px; border-top: 1px solid #f0e8e0; flex-wrap: wrap; }
+    .muted { opacity: 0.55; }
+    .tag { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
+    .tag-off { background: #fed7d7; color: #c53030; }
+    .tag-on { background: #c6f6d5; color: #276749; }
+
+    .list { background: white; border-radius: 12px; box-shadow: 0 1px 6px #0001; }
+    .list-row { padding: 14px 16px; border-bottom: 1px solid #f0e8e0; display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+    .list-row:last-child { border-bottom: none; }
+    .list-row .grow { flex: 1; min-width: 200px; }
+
+    .modal-overlay { position: fixed; inset: 0; background: #0006; display: flex; align-items: center; justify-content: center; z-index: 100; padding: 12px; }
+    .modal { background: white; border-radius: 14px; padding: 24px; width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto; }
+    .modal h3 { margin-bottom: 16px; color: #8B4513; }
+    .modal label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #555; }
+    .hint { font-size: 0.78rem; color: #888; margin: -8px 0 12px; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+    .img-field { display: flex; gap: 8px; align-items: center; }
+    .img-field input[type=text] { margin-bottom: 0; }
+    .img-preview { max-width: 100%; max-height: 140px; border-radius: 8px; margin: 8px 0 12px; display: none; }
+    .sizes-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .sizes-row input { margin-bottom: 0; }
+    .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .check input { width: auto; margin: 0; }
+
+    .alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
+    .alert-success { background: #c6f6d5; color: #276749; }
+    .alert-error { background: #fed7d7; color: #9b2c2c; }
+    .empty, .spinner { text-align: center; padding: 50px; color: #888; }
+  </style>
+</head>
+<body>
+
+<div id="login-screen">
+  <h2>🧶 Fios MJ Admin</h2>
+  <label>Senha de administrador</label>
+  <input type="password" id="login-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+  <button class="btn-primary" style="width:100%" onclick="doLogin()">Entrar</button>
+  <div id="login-error" class="alert alert-error" style="display:none;margin-top:12px"></div>
+</div>
+
+<div id="panel" style="display:none">
+  <header>
+    <span style="font-size:1.4rem">🧶</span>
+    <h1>Fios MJ — Painel Admin</h1>
+    <a href="/" target="_blank" style="color:#fff;margin-left:auto;font-size:.85rem">Ver site ↗</a>
+    <button class="btn-outline btn-sm" onclick="logout()">Sair</button>
+  </header>
+
+  <main>
+    <nav class="tabs">
+      <button data-tab="products" onclick="showTab('products')">🛍️ Produtos</button>
+      <button data-tab="blog" onclick="showTab('blog')">📝 Blog</button>
+      <button data-tab="testimonials" onclick="showTab('testimonials')">💬 Depoimentos</button>
+      <button data-tab="newsletter" onclick="showTab('newsletter')">📧 Newsletter</button>
+    </nav>
+    <div id="alert-box" style="display:none"></div>
+
+    <section id="tab-products">
+      <div class="toolbar">
+        <h2>Produtos <small id="product-count" style="color:#888;font-weight:400"></small></h2>
+        <button class="btn-outline btn-sm" onclick="loadProducts()">↻ Atualizar</button>
+        <button class="btn-primary btn-sm" onclick="openProduct()">+ Novo produto</button>
+      </div>
+      <div id="products-container"><div class="spinner">Carregando...</div></div>
+    </section>
+
+    <section id="tab-blog" style="display:none">
+      <div class="toolbar">
+        <h2>Posts do blog <small id="blog-count" style="color:#888;font-weight:400"></small></h2>
+        <button class="btn-outline btn-sm" onclick="loadPosts()">↻ Atualizar</button>
+        <button class="btn-primary btn-sm" onclick="openPost()">+ Novo post</button>
+      </div>
+      <div id="blog-container"><div class="spinner">Carregando...</div></div>
+    </section>
+
+    <section id="tab-testimonials" style="display:none">
+      <div class="toolbar">
+        <h2>Depoimentos aguardando aprovação</h2>
+        <button class="btn-outline btn-sm" onclick="loadTestimonials()">↻ Atualizar</button>
+      </div>
+      <div id="testimonials-container"><div class="spinner">Carregando...</div></div>
+    </section>
+
+    <section id="tab-newsletter" style="display:none">
+      <div class="toolbar">
+        <h2>Inscritas na newsletter <small id="nl-count" style="color:#888;font-weight:400"></small></h2>
+        <button class="btn-outline btn-sm" onclick="exportCsv()">⬇ Exportar CSV</button>
+      </div>
+      <div id="newsletter-container"><div class="spinner">Carregando...</div></div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL PRODUTO -->
+<div id="product-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModals()">
+  <div class="modal">
+    <h3 id="product-modal-title">Novo produto</h3>
+    <label>Nome *</label>
+    <input id="p-name" placeholder="Ex: Cropped Halter Brasil 🇧🇷"/>
+    <label>Descrição</label>
+    <textarea id="p-desc" rows="3"></textarea>
+    <label>Preço base (R$) *</label>
+    <input id="p-price" type="number" step="0.01" min="0"/>
+    <label>Categoria</label>
+    <select id="p-cat">
+      <option value="">Selecione...</option>
+      <option>Roupas</option><option>Amigurumi</option><option>Bolsas</option>
+      <option>Acessórios</option><option>Decoração</option><option>Outro</option>
+    </select>
+    <label>Imagem</label>
+    <div class="img-field">
+      <input id="p-img" type="text" placeholder="/uploads/roupas/foto.jpg" oninput="preview('p')"/>
+      <button class="btn-outline btn-sm" onclick="pickImage('p')">📷 Enviar</button>
+    </div>
+    <img id="p-preview" class="img-preview" alt=""/>
+    <label>Estoque</label>
+    <input id="p-stock" type="number" min="0" placeholder="Deixe vazio se for sob encomenda"/>
+    <label>Ordem de exibição</label>
+    <input id="p-order" type="number" placeholder="1 aparece primeiro"/>
+    <label>Tamanhos / variantes (opcional)</label>
+    <div id="sizes-container"></div>
+    <button class="btn-outline btn-sm" onclick="addSizeRow()" style="margin-bottom:12px">+ Adicionar tamanho</button>
+    <label class="check"><input type="checkbox" id="p-active"/> Produto visível na loja</label>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModals()">Cancelar</button>
+      <button class="btn-primary" onclick="saveProduct()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL POST -->
+<div id="post-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModals()">
+  <div class="modal">
+    <h3 id="post-modal-title">Novo post</h3>
+    <label>Título *</label>
+    <input id="b-title" oninput="autoSlug()"/>
+    <label>Endereço (slug)</label>
+    <input id="b-slug" placeholder="gerado a partir do título" oninput="slugTouched=true"/>
+    <p class="hint">Fica em fiosmj.com/#/blog/<span id="b-slug-preview">…</span></p>
+    <label>Resumo</label>
+    <textarea id="b-excerpt" rows="2" maxlength="500" placeholder="Aparece na lista de posts"></textarea>
+    <label>Imagem de capa</label>
+    <div class="img-field">
+      <input id="b-img" type="text" placeholder="/uploads/blog/capa.jpg" oninput="preview('b')"/>
+      <button class="btn-outline btn-sm" onclick="pickImage('b')">📷 Enviar</button>
+    </div>
+    <img id="b-preview" class="img-preview" alt=""/>
+    <label>Conteúdo *</label>
+    <textarea id="b-content" rows="14" placeholder="Escreva o texto. Linha em branco separa parágrafos. Use ## no início da linha para um subtítulo."></textarea>
+    <p class="hint">Aceita texto simples (## Subtítulo, - item de lista) ou HTML.</p>
+    <label>Autora</label>
+    <input id="b-author" placeholder="Maju"/>
+    <label class="check"><input type="checkbox" id="b-published"/> Publicado (visível no site)</label>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModals()">Cancelar</button>
+      <button class="btn-primary" onclick="savePost()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" style="display:none"/>
+
+<script>
+  let SECRET = '';
+  let editingProduct = null, editingPost = null, slugTouched = false;
+  let products = [], posts = [], subscribers = [];
+  const loaded = {};
+
+  // ── Utilidades ────────────────────────────────────────────────────────────
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  async function api(url, opts = {}) {
+    const headers = { 'X-Admin-Secret': SECRET, ...(opts.headers || {}) };
+    if (opts.json !== undefined) { headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(opts.json); }
+    const r = await fetch(url, { ...opts, headers });
+    if (r.status === 403) { logout(); throw new Error('Sessão expirada, entre novamente'); }
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || data.error) throw new Error(data.error || ('Erro ' + r.status));
+    return data;
+  }
+
+  function showAlert(msg, type = 'success') {
+    const box = $('alert-box');
+    box.className = `alert alert-${type}`;
+    box.textContent = msg;
+    box.style.display = 'block';
+    clearTimeout(showAlert.t);
+    showAlert.t = setTimeout(() => box.style.display = 'none', 4000);
+  }
+  const fail = e => showAlert(e.message, 'error');
+
+  // ── Login ─────────────────────────────────────────────────────────────────
+  async function doLogin(saved) {
+    SECRET = saved || $('login-input').value.trim();
+    if (!SECRET) return;
+    try {
+      const r = await fetch('/api/admin/products', { headers: { 'X-Admin-Secret': SECRET } });
+      if (!r.ok) throw new Error('Senha incorreta');
+      try { sessionStorage.setItem('fiosmj-admin', SECRET); } catch (_) {}
+      $('login-screen').style.display = 'none';
+      $('panel').style.display = 'block';
+      showTab('products');
+    } catch (e) {
+      SECRET = '';
+      try { sessionStorage.removeItem('fiosmj-admin'); } catch (_) {}
+      if (!saved) { $('login-error').textContent = e.message; $('login-error').style.display = 'block'; }
+    }
+  }
+
+  function logout() {
+    SECRET = '';
+    try { sessionStorage.removeItem('fiosmj-admin'); } catch (_) {}
+    Object.keys(loaded).forEach(k => delete loaded[k]);
+    $('panel').style.display = 'none';
+    $('login-screen').style.display = 'block';
+    $('login-input').value = '';
+  }
+
+  function showTab(tab) {
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    ['products', 'blog', 'testimonials', 'newsletter'].forEach(t => $('tab-' + t).style.display = t === tab ? 'block' : 'none');
+    if (!loaded[tab]) {
+      loaded[tab] = true;
+      ({ products: loadProducts, blog: loadPosts, testimonials: loadTestimonials, newsletter: loadNewsletter })[tab]();
+    }
+  }
+
+  // ── Upload de imagem ──────────────────────────────────────────────────────
+  let uploadTarget = null;
+  function pickImage(prefix) { uploadTarget = prefix; $('file-input').value = ''; $('file-input').click(); }
+  $('file-input').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file || !uploadTarget) return;
+    const category = uploadTarget === 'b' ? 'blog' : categoryFolder($('p-cat').value);
+    const form = new FormData();
+    form.append('file', file);
+    form.append('category', category);
+    try {
+      showAlert('Enviando imagem...');
+      const r = await fetch('/api/admin/upload', { method: 'POST', headers: { 'X-Admin-Secret': SECRET }, body: form });
+      const data = await r.json();
+      if (!r.ok || data.error) throw new Error(data.error || 'Falha no envio');
+      $(uploadTarget + '-img').value = data.url;
+      preview(uploadTarget);
+      showAlert('Imagem enviada ✅');
+    } catch (err) { fail(err); }
+  });
+  function categoryFolder(cat) {
+    const map = { 'Roupas': 'roupas', 'Amigurumi': 'amigurumi', 'Bolsas': 'bolsas', 'Acessórios': 'acessorios', 'Decoração': 'decoracao' };
+    return map[cat] || 'outros';
+  }
+  function preview(prefix) {
+    const url = $(prefix + '-img').value.trim(), img = $(prefix + '-preview');
+    img.style.display = url ? 'block' : 'none';
+    if (url) img.src = url;
+  }
+
+  function closeModals() {
+    $('product-modal').style.display = 'none';
+    $('post-modal').style.display = 'none';
+    editingProduct = editingPost = null;
+  }
+
+  // ── Produtos ──────────────────────────────────────────────────────────────
+  async function loadProducts() {
+    $('products-container').innerHTML = '<div class="spinner">Carregando...</div>';
+    try {
+      products = await api('/api/admin/products');
+      $('product-count').textContent = `(${products.length})`;
+      if (!products.length) { $('products-container').innerHTML = '<div class="empty">Nenhum produto ainda.</div>'; return; }
+      $('products-container').innerHTML = '<div class="grid">' + products.map(p => `
+        <div class="card ${p.active ? '' : 'muted'}">
+          <img src="${esc(p.imageUrl)}" alt="" loading="lazy" onerror="this.removeAttribute('src')"/>
+          <div class="info">
+            <div class="name">${esc(p.name)}${p.active ? '' : '<span class="tag tag-off">oculto</span>'}</div>
+            <div class="meta">${esc(p.category || '—')} · Estoque: ${p.stock ?? '—'} · Ordem: ${p.displayOrder ?? 0}</div>
+            <div class="price">R$ ${(p.price || 0).toFixed(2).replace('.', ',')}</div>
+            ${p.sizes && p.sizes.length ? '<div class="meta">Tamanhos: ' + p.sizes.map(s => esc(s.size) + ' → R$' + s.price).join(', ') + '</div>' : ''}
+          </div>
+          <div class="actions">
+            <button class="btn-outline btn-sm" onclick="openProduct(${p.id})">✏️ Editar</button>
+            <button class="btn-sm ${p.active ? 'btn-danger' : 'btn-success'}" onclick="toggleProduct(${p.id})">${p.active ? '🙈 Ocultar' : '👁️ Mostrar'}</button>
+            <button class="btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑️</button>
+          </div>
+        </div>`).join('') + '</div>';
+    } catch (e) { $('products-container').innerHTML = ''; fail(e); }
+  }
+
+  function openProduct(id) {
+    const p = id ? products.find(x => x.id === id) : {};
+    if (!p) return;
+    editingProduct = id || null;
+    $('product-modal-title').textContent = id ? 'Editar produto' : 'Novo produto';
+    $('p-name').value = p.name || '';
+    $('p-desc').value = p.description || '';
+    $('p-price').value = p.price ?? '';
+    $('p-cat').value = p.category || '';
+    $('p-img').value = p.imageUrl || '';
+    $('p-stock').value = p.stock ?? '';
+    $('p-order').value = p.displayOrder ?? '';
+    $('p-active').checked = id ? p.active !== false : true;
+    $('sizes-container').innerHTML = '';
+    (p.sizes || []).forEach(s => addSizeRow(s.size, s.price));
+    preview('p');
+    $('product-modal').style.display = 'flex';
+  }
+
+  async function saveProduct() {
+    const sizes = [...document.querySelectorAll('.sizes-row')].map(r => ({
+      size: r.querySelector('.sz-size').value.trim(), price: parseFloat(r.querySelector('.sz-price').value) || 0
+    })).filter(s => s.size);
+    const body = {
+      name: $('p-name').value.trim(),
+      description: $('p-desc').value.trim(),
+      price: parseFloat($('p-price').value) || 0,
+      category: $('p-cat').value,
+      imageUrl: $('p-img').value.trim(),
+      stock: $('p-stock').value !== '' ? parseInt($('p-stock').value) : null,
+      displayOrder: parseInt($('p-order').value) || 0,
+      active: $('p-active').checked,
+      sizes: sizes.length ? sizes : null,
+    };
+    if (!body.name) return showAlert('O nome é obrigatório', 'error');
+    try {
+      await api(editingProduct ? `/api/admin/products/${editingProduct}` : '/api/admin/products',
+        { method: editingProduct ? 'PUT' : 'POST', json: body });
+      showAlert(editingProduct ? 'Produto atualizado ✅' : 'Produto criado ✅');
+      closeModals();
+      loadProducts();
+    } catch (e) { fail(e); }
+  }
+
+  async function toggleProduct(id) {
+    try { await api(`/api/admin/products/${id}/toggle`, { method: 'POST' }); loadProducts(); } catch (e) { fail(e); }
+  }
+
+  async function deleteProduct(id) {
+    const p = products.find(x => x.id === id);
+    if (!confirm(`Apagar "${p ? p.name : id}" permanentemente?`)) return;
+    try { await api(`/api/admin/products/${id}`, { method: 'DELETE' }); showAlert('Produto apagado'); loadProducts(); } catch (e) { fail(e); }
+  }
+
+  function addSizeRow(size = '', price = '') {
+    const div = document.createElement('div');
+    div.className = 'sizes-row';
+    div.innerHTML = `
+      <input placeholder="Tamanho (P, M, G...)" class="sz-size" style="flex:1"/>
+      <input placeholder="Preço R$" type="number" step="0.01" class="sz-price" style="flex:1"/>
+      <button class="btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>`;
+    div.querySelector('.sz-size').value = size;
+    div.querySelector('.sz-price').value = price;
+    $('sizes-container').appendChild(div);
+  }
+
+  // ── Blog ──────────────────────────────────────────────────────────────────
+  async function loadPosts() {
+    $('blog-container').innerHTML = '<div class="spinner">Carregando...</div>';
+    try {
+      posts = await api('/api/admin/blog');
+      $('blog-count').textContent = `(${posts.length})`;
+      if (!posts.length) { $('blog-container').innerHTML = '<div class="empty">Nenhum post ainda. Clique em "Novo post".</div>'; return; }
+      $('blog-container').innerHTML = '<div class="list">' + posts.map(p => `
+        <div class="list-row">
+          ${p.imageUrl ? `<img src="${esc(p.imageUrl)}" alt="" style="width:90px;height:64px;object-fit:cover;border-radius:8px" onerror="this.remove()"/>` : ''}
+          <div class="grow">
+            <div class="name" style="font-weight:600">${esc(p.title)}
+              <span class="tag ${p.published ? 'tag-on' : 'tag-off'}">${p.published ? 'publicado' : 'rascunho'}</span></div>
+            <div class="meta" style="font-size:.8rem;color:#888;margin:4px 0">/${esc(p.slug)} · ${esc(p.authorName || '')} · ${formatDate(p.createdAt)}</div>
+            <div style="font-size:.88rem;color:#555">${esc(p.excerpt || '')}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn-outline btn-sm" onclick="openPost(${p.id})">✏️ Editar</button>
+            <button class="btn-sm ${p.published ? 'btn-outline' : 'btn-success'}" onclick="togglePost(${p.id})">${p.published ? 'Despublicar' : 'Publicar'}</button>
+            <button class="btn-danger btn-sm" onclick="deletePost(${p.id})">🗑️</button>
+          </div>
+        </div>`).join('') + '</div>';
+    } catch (e) { $('blog-container').innerHTML = ''; fail(e); }
+  }
+
+  function slugify(s) {
+    return s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 80);
+  }
+  function autoSlug() {
+    if (!slugTouched) $('b-slug').value = slugify($('b-title').value);
+    $('b-slug-preview').textContent = $('b-slug').value || '…';
+  }
+  $('b-slug').addEventListener('input', () => $('b-slug-preview').textContent = $('b-slug').value || '…');
+
+  // Converte texto simples em HTML; se já for HTML, mantém
+  function toHtml(text) {
+    if (/<\/?(p|h2|h3|ul|ol|li|strong|em|br)\b/i.test(text)) return text;
+    return text.split(/\n\s*\n/).map(block => {
+      const lines = block.trim().split('\n');
+      if (lines.every(l => /^\s*[-*]\s+/.test(l)))
+        return '<ul>' + lines.map(l => '<li>' + esc(l.replace(/^\s*[-*]\s+/, '')) + '</li>').join('') + '</ul>';
+      if (/^##\s+/.test(lines[0]) && lines.length === 1) return '<h2>' + esc(lines[0].replace(/^##\s+/, '')) + '</h2>';
+      return '<p>' + lines.map(esc).join('<br>') + '</p>';
+    }).filter(b => b !== '<p></p>').join('\n');
+  }
+
+  function openPost(id) {
+    const p = id ? posts.find(x => x.id === id) : {};
+    if (!p) return;
+    editingPost = id || null;
+    slugTouched = !!id;
+    $('post-modal-title').textContent = id ? 'Editar post' : 'Novo post';
+    $('b-title').value = p.title || '';
+    $('b-slug').value = p.slug || '';
+    $('b-slug-preview').textContent = p.slug || '…';
+    $('b-excerpt').value = p.excerpt || '';
+    $('b-img').value = p.imageUrl || '';
+    $('b-content').value = p.content || '';
+    $('b-author').value = p.authorName || 'Maju';
+    $('b-published').checked = !!p.published;
+    preview('b');
+    $('post-modal').style.display = 'flex';
+  }
+
+  async function savePost() {
+    const body = {
+      title: $('b-title').value.trim(),
+      slug: $('b-slug').value.trim() || slugify($('b-title').value),
+      excerpt: $('b-excerpt').value.trim(),
+      imageUrl: $('b-img').value.trim(),
+      content: toHtml($('b-content').value.trim()),
+      authorName: $('b-author').value.trim() || 'Maju',
+      published: $('b-published').checked,
+    };
+    if (!body.title) return showAlert('O título é obrigatório', 'error');
+    if (!body.content) return showAlert('O conteúdo é obrigatório', 'error');
+    try {
+      await api(editingPost ? `/api/admin/blog/${editingPost}` : '/api/admin/blog',
+        { method: editingPost ? 'PUT' : 'POST', json: body });
+      showAlert(editingPost ? 'Post atualizado ✅' : 'Post criado ✅');
+      closeModals();
+      loadPosts();
+    } catch (e) { fail(e); }
+  }
+
+  async function togglePost(id) {
+    try { await api(`/api/admin/blog/${id}/toggle`, { method: 'POST' }); loadPosts(); } catch (e) { fail(e); }
+  }
+
+  async function deletePost(id) {
+    const p = posts.find(x => x.id === id);
+    if (!confirm(`Apagar o post "${p ? p.title : id}" permanentemente?`)) return;
+    try { await api(`/api/admin/blog/${id}`, { method: 'DELETE' }); showAlert('Post apagado'); loadPosts(); } catch (e) { fail(e); }
+  }
+
+  // ── Depoimentos ───────────────────────────────────────────────────────────
+  async function loadTestimonials() {
+    $('testimonials-container').innerHTML = '<div class="spinner">Carregando...</div>';
+    try {
+      const list = await api('/api/social/admin/testimonials/pending');
+      if (!list.length) { $('testimonials-container').innerHTML = '<div class="empty">Nenhum depoimento aguardando aprovação 🎉</div>'; return; }
+      $('testimonials-container').innerHTML = '<div class="list">' + list.map(t => `
+        <div class="list-row">
+          <div class="grow">
+            <div style="font-weight:600">${esc(t.customerName)} <span style="color:#888;font-weight:400">· ${esc(t.city || '')}</span>
+              <span style="color:#d69e2e">${'★'.repeat(t.rating || 0)}</span></div>
+            <div style="margin-top:6px">${esc(t.message)}</div>
+            ${t.occasion ? `<div class="meta" style="font-size:.8rem;color:#888;margin-top:4px">Ocasião: ${esc(t.occasion)}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn-success btn-sm" onclick="approveTestimonial(${t.id}, false)">Aprovar</button>
+            <button class="btn-outline btn-sm" onclick="approveTestimonial(${t.id}, true)">⭐ Aprovar e destacar</button>
+            <button class="btn-danger btn-sm" onclick="rejectTestimonial(${t.id})">Recusar</button>
+          </div>
+        </div>`).join('') + '</div>';
+    } catch (e) { $('testimonials-container').innerHTML = ''; fail(e); }
+  }
+
+  async function approveTestimonial(id, featured) {
+    try { await api(`/api/social/admin/testimonials/${id}/approve`, { method: 'POST', json: { featured } }); showAlert('Depoimento aprovado ✅'); loadTestimonials(); } catch (e) { fail(e); }
+  }
+  async function rejectTestimonial(id) {
+    if (!confirm('Recusar e apagar este depoimento?')) return;
+    try { await api(`/api/social/admin/testimonials/${id}`, { method: 'DELETE' }); showAlert('Depoimento removido'); loadTestimonials(); } catch (e) { fail(e); }
+  }
+
+  // ── Newsletter ────────────────────────────────────────────────────────────
+  async function loadNewsletter() {
+    $('newsletter-container').innerHTML = '<div class="spinner">Carregando...</div>';
+    try {
+      const data = await api('/api/newsletter/admin/subscribers');
+      subscribers = data.subscribers || [];
+      $('nl-count').textContent = `(${data.total})`;
+      if (!subscribers.length) { $('newsletter-container').innerHTML = '<div class="empty">Nenhuma inscrição ainda.</div>'; return; }
+      $('newsletter-container').innerHTML = '<div class="list">' + subscribers.map(s => `
+        <div class="list-row"><div class="grow"><strong>${esc(s.email)}</strong> ${s.name ? '· ' + esc(s.name) : ''}</div>
+        <div style="color:#888;font-size:.85rem">${formatDate(s.createdAt)}</div></div>`).join('') + '</div>';
+    } catch (e) { $('newsletter-container').innerHTML = ''; fail(e); }
+  }
+
+  function exportCsv() {
+    const rows = [['email', 'nome', 'data'], ...subscribers.map(s => [s.email, s.name || '', s.createdAt || ''])];
+    const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' }));
+    a.download = 'newsletter-fiosmj.csv';
+    a.click();
+  }
+
+  function formatDate(d) {
+    if (!d) return '';
+    const dt = new Date(d);
+    return isNaN(dt) ? '' : dt.toLocaleDateString('pt-BR');
+  }
+
+  // Sessão guardada só nesta aba do navegador
+  try { const s = sessionStorage.getItem('fiosmj-admin'); if (s) doLogin(s); } catch (_) {}
+</script>
+</body>
+</html>

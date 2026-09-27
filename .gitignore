@@ -1,0 +1,29 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.log
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE / SO
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+src/main/resources/static/assets/
+src/main/resources/static/index.html
+
+# Segredos e dados (ficam no servidor, nunca no git)
+.env
+.env.*
+!.env.example
+data/
+*.db
+*.db.bak
+backups/
+ssl/
+*.pid

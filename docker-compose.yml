@@ -1,0 +1,17 @@
+# Fios MJ — só a aplicação. O Nginx e o Certbot ficam no host (KVM),
+# compartilhados com os outros sites.
+services:
+  app:
+    build: .
+    image: fiosmj:latest
+    container_name: fiosmj
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8081:8081"   # acessível só pelo Nginx do host
+    volumes:
+      - fiosmj_data:/app/data   # banco SQLite + imagens enviadas
+
+volumes:
+  fiosmj_data:
+    name: fiosmj_data

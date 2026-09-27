@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /api/admin/
+Disallow: /api/auth/
+Disallow: /api/cart/
+Disallow: /api/orders/
+Disallow: /api/customers/
+Disallow: /api/newsletter/admin/
+Disallow: /api/social/admin/
+Sitemap: https://fiosmj.com/sitemap.xml

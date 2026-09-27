@@ -1,0 +1,129 @@
+/* ──────────────────────────────────────────────────
+   Fios MJ — Paleta identidade visual 2026
+   Fonte: logótipo oficial (dusty rose, cream, gold, brown)
+   ────────────────────────────────────────────────── */
+:root {
+  /* Cores principais */
+  --pink-primary:  #C4736A;   /* dusty rose — cor principal */
+  --pink-dark:     #8B4A44;   /* rose escuro */
+  --pink-light:    #FAE8E2;   /* cream-rose claro */
+  --pink-soft:     #D4928A;   /* rose suave */
+  --pink-bg:       #FDF8F2;   /* fundo cream quente */
+
+  /* Acentos novos */
+  --gold:          #C4956A;   /* dourado/tan do logótipo */
+  --gold-dark:     #9C7040;   /* dourado escuro */
+  --cream:         #FAF0E6;   /* linho/creme */
+  --lace:          #E8D5BE;   /* renda */
+
+  /* Texto */
+  --text-dark:     #3D2010;   /* castanho escuro */
+  --text-medium:   #7A5544;   /* castanho médio */
+  --text-light:    #A08070;   /* castanho claro */
+
+  /* Neutros */
+  --white:         #ffffff;
+  --gray-dark:     #3D2010;
+
+  /* Tipografia */
+  --font-heading:  'Playfair Display', Georgia, serif;
+
+  /* Sombras (tom quente) */
+  --shadow:        0 4px 20px rgba(196, 115, 106, 0.18);
+  --shadow-hover:  0 8px 30px rgba(196, 115, 106, 0.30);
+  --radius:        16px;
+  --transition:    all 0.3s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-dark);
+  background: var(--pink-bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+}
+
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; height: auto; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ── Títulos de secção ── */
+.section-title {
+  font-size: 2.2rem;
+  color: var(--pink-dark);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.section-subtitle {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+}
+
+/* ── Botões ── */
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #25D366;
+  color: white;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+}
+.btn-whatsapp:hover {
+  background: #1da851;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(37,211,102,0.4);
+}
+
+.btn-pink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--pink-primary);
+  color: white;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+}
+.btn-pink:hover {
+  background: var(--pink-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ── Animações base ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.05); }
+}
+.fade-in { animation: fadeInUp 0.6s ease forwards; }
