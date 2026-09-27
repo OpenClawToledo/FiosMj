@@ -7,7 +7,6 @@ DB="${1:?informe o caminho do fiosmj.db}"
 UPLOADS="${2:-}"
 [ -f "$DB" ] || { echo "❌ $DB não existe"; exit 1; }
 
-docker volume create fiosmj_data >/dev/null
 docker run --rm -v fiosmj_data:/data -v "$(realpath "$DB")":/src/fiosmj.db:ro alpine \
   sh -c 'mkdir -p /data/uploads && cp /src/fiosmj.db /data/fiosmj.db'
 
@@ -18,5 +17,5 @@ if [ -n "$UPLOADS" ]; then
 fi
 
 # O container roda como usuário não-root "fiosmj"
-docker compose run --rm --no-deps --user root --entrypoint chown app -R fiosmj:fiosmj /app/data
+docker compose run -T --rm --no-deps --user root --entrypoint chown app -R fiosmj:fiosmj /app/data
 echo "✅ Dados importados. Suba com: docker compose up -d"

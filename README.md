@@ -56,6 +56,7 @@ O Nginx √© **o do host**, compartilhado com os outros sites da KVM. O projeto n√
 mkdir -p /opt/apps && cd /opt/apps
 git clone https://github.com/<conta>/FiosMJ.git fiosmj && cd fiosmj
 cp .env.example .env && nano .env        # JWT_SECRET, ADMIN_SECRET, MP_*
+docker volume create fiosmj_data >/dev/null
 docker compose up -d --build
 curl -s http://127.0.0.1:8081/api/health
 
