@@ -96,7 +96,7 @@
         <div class="review-cta">
           <p>Comprou este produto? Deixe sua avaliação! 💬</p>
           <a
-            :href="`https://wa.me/5533999892409?text=${encodeURIComponent('Olá! Quero deixar uma avaliação do produto: ' + product.name)}`"
+            :href="$site.wa('Olá! Quero deixar uma avaliação do produto: ' + product.name)"
             target="_blank" rel="noopener"
             class="btn-review"
           >✍️ Deixar Avaliação</a>
@@ -131,8 +131,7 @@ export default {
     },
     whatsappUrl() {
       const name = this.product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim()
-      const msg = encodeURIComponent(`Olá! Tenho interesse no produto: ${name}. Pode me dar mais informações? 🧶`)
-      return `https://wa.me/5533999892409?text=${msg}`
+      return this.$site.wa(`Olá! Tenho interesse no produto: ${name}. Pode me dar mais informações? 🧶`)
     }
   },
   methods: {

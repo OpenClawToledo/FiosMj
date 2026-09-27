@@ -13,6 +13,29 @@ import java.nio.charset.StandardCharsets;
 @Controller
 public class PageController {
 
+    private final SiteSettingsController siteSettings;
+
+    public PageController(SiteSettingsController siteSettings) {
+        this.siteSettings = siteSettings;
+    }
+
+    /** Aplica os contatos definidos no painel admin às páginas fixas. */
+    private String fill(String html) {
+        var s = siteSettings.get();
+        String wa = s.getOrDefault("whatsapp", "").replaceAll("\\D", "");
+        String ig = s.getOrDefault("instagram", "");
+        return html
+                .replace("__WA_URL__", "https://wa.me/" + wa)
+                .replace("__WA_DISPLAY__", esc(s.getOrDefault("whatsappDisplay", "")))
+                .replace("__IG_URL__", "https://instagram.com/" + esc(ig))
+                .replace("__IG_HANDLE__", "@" + esc(ig));
+    }
+
+    private static String esc(String v) {
+        return v.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    }
+
+
     @GetMapping("/admin")
     public ResponseEntity<byte[]> admin() throws IOException {
         var resource = new ClassPathResource("static/admin.html");
@@ -24,7 +47,7 @@ public class PageController {
     @GetMapping("/obrigado")
     @ResponseBody
     public String obrigado() {
-        return """
+        return fill("""
             <!DOCTYPE html>
             <html lang="pt-BR">
             <head>
@@ -55,13 +78,13 @@ public class PageController {
               </div>
             </body>
             </html>
-            """;
+            """);
     }
 
     @GetMapping("/politica-de-privacidade")
     @ResponseBody
     public String privacidade() {
-        return """
+        return fill("""
             <!DOCTYPE html>
             <html lang="pt-BR">
             <head>
@@ -111,22 +134,22 @@ public class PageController {
                 <p>Não vendemos nem compartilhamos seus dados pessoais com terceiros, exceto quando necessário para processar pagamentos ou cumprir obrigações legais.</p>
 
                 <h2>5. Seus Direitos (LGPD)</h2>
-                <p>Você tem direito a acessar, corrigir ou solicitar a exclusão dos seus dados. Entre em contato conosco pelo WhatsApp: <a href="https://wa.me/5533999892409">+55 33 99989-2409</a>.</p>
+                <p>Você tem direito a acessar, corrigir ou solicitar a exclusão dos seus dados. Entre em contato conosco pelo WhatsApp: <a href="__WA_URL__">__WA_DISPLAY__</a>.</p>
 
                 <h2>6. Contato</h2>
-                <p>Dúvidas? Fale conosco: <a href="https://wa.me/5533999892409">WhatsApp</a> ou <a href="https://instagram.com/fiosmjcroche">Instagram</a>.</p>
+                <p>Dúvidas? Fale conosco: <a href="__WA_URL__">WhatsApp</a> ou <a href="__IG_URL__">Instagram</a>.</p>
 
                 <a href="/" class="back">← Voltar à Loja</a>
               </div>
             </body>
             </html>
-            """;
+            """);
     }
 
     @GetMapping("/termos-e-condicoes")
     @ResponseBody
     public String termos() {
-        return """
+        return fill("""
             <!DOCTYPE html>
             <html lang="pt-BR">
             <head>
@@ -180,19 +203,19 @@ public class PageController {
                 </ul>
 
                 <h2>5. Contato</h2>
-                <p>Dúvidas? Fale conosco pelo <a href="https://wa.me/5533999892409">WhatsApp: +55 33 99989-2409</a></p>
+                <p>Dúvidas? Fale conosco pelo <a href="__WA_URL__">WhatsApp: __WA_DISPLAY__</a></p>
 
                 <a href="/" class="back">← Voltar à Loja</a>
               </div>
             </body>
             </html>
-            """;
+            """);
     }
 
     @GetMapping("/contacto")
     @ResponseBody
     public String contacto() {
-        return """
+        return fill("""
             <!DOCTYPE html>
             <html lang="pt-BR">
             <head>
@@ -268,13 +291,13 @@ public class PageController {
               </script>
             </body>
             </html>
-            """;
+            """);
     }
 
     @GetMapping("/pendente")
     @ResponseBody
     public String pendente() {
-        return """
+        return fill("""
             <!DOCTYPE html>
             <html lang="pt-BR">
             <head>
@@ -305,6 +328,6 @@ public class PageController {
               </div>
             </body>
             </html>
-            """;
+            """);
     }
 }

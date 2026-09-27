@@ -8,7 +8,7 @@
         <a href="#produtos" @click="menuOpen = false">Produtos</a>
         <a href="#como-pedir" @click="menuOpen = false">Como Pedir</a>
         <a href="#sobre" @click="menuOpen = false">Sobre</a>
-        <a href="https://instagram.com/fiosmjcroche" target="_blank" rel="noopener" class="nav-instagram">
+        <a :href="$site.igUrl" target="_blank" rel="noopener" class="nav-instagram">
           📸 Instagram
         </a>
       </nav>

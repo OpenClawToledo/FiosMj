@@ -4,18 +4,18 @@
       <span class="ig-logo">📸</span>
       <div>
         <h2 class="section-title">Siga a gente no Instagram</h2>
-        <a class="ig-handle" href="https://instagram.com/fiosmjcroche" target="_blank" rel="noopener">
-          @fiosmjcroche
+        <a class="ig-handle" :href="$site.igUrl" target="_blank" rel="noopener">
+          {{ $site.igHandle }}
         </a>
       </div>
     </div>
 
     <div v-if="posts.length === 0" class="ig-placeholder">
       <div class="ig-grid-placeholder">
-        <a href="https://instagram.com/fiosmjcroche" target="_blank" class="ig-cta-block">
+        <a :href="$site.igUrl" target="_blank" class="ig-cta-block">
           <span class="ig-icon-big">📸</span>
           <p>Veja nossos trabalhos no Instagram!</p>
-          <span class="ig-btn">@fiosmjcroche →</span>
+          <span class="ig-btn">{{ $site.igHandle }} →</span>
         </a>
       </div>
     </div>
@@ -30,7 +30,7 @@
           class="carousel-slide"
           :class="{ active: i === current }"
         >
-          <a :href="post.postUrl || 'https://instagram.com/fiosmjcroche'" target="_blank" rel="noopener" class="ig-card">
+          <a :href="post.postUrl || $site.igUrl" target="_blank" rel="noopener" class="ig-card">
             <div class="ig-img-wrap">
               <img :src="proxyUrl(post.imageUrl)" :alt="post.caption" loading="lazy" />
               <div class="ig-overlay">
@@ -57,8 +57,8 @@
     </div>
 
     <div class="ig-follow-cta">
-      <a href="https://instagram.com/fiosmjcroche" target="_blank" rel="noopener" class="btn-follow">
-        📸 Seguir @fiosmjcroche
+      <a :href="$site.igUrl" target="_blank" rel="noopener" class="btn-follow">
+        📸 Seguir {{ $site.igHandle }}
       </a>
     </div>
   </section>

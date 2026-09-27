@@ -1,45 +1,29 @@
 <template>
   <section id="sobre" class="about-section">
     <div class="container">
-      <h2 class="section-title">💗 Sobre a Fios MJ</h2>
-      <p class="section-subtitle">Conheça nossa história</p>
+      <h2 class="section-title">{{ $site.s.aboutTitle }}</h2>
+      <p class="section-subtitle">{{ $site.s.aboutSubtitle }}</p>
 
       <div class="about-content">
-        <p class="about-text">
-          Somos <strong>mãe e filha</strong> unidas pela paixão pelo crochê! 🧶 Cada peça que criamos 
-          carrega carinho, dedicação e muitas horas de trabalho manual.
-        </p>
-        <p class="about-text">
-          Trabalhamos com encomendas personalizadas — você escolhe as cores, o tamanho e o modelo. 
-          Do amigurumi fofo à roupa estilosa, a gente faz com amor!
-        </p>
-        <p class="about-text highlight">
-          ✨ Crochê artesanal feito com o coração
-        </p>
+        <p class="about-text" v-if="$site.s.aboutText1" v-html="$site.rich($site.s.aboutText1)"></p>
+        <p class="about-text" v-if="$site.s.aboutText2" v-html="$site.rich($site.s.aboutText2)"></p>
+        <p class="about-text highlight" v-if="$site.s.aboutHighlight">{{ $site.s.aboutHighlight }}</p>
       </div>
 
       <div class="about-stats">
-        <div class="stat">
-          <span class="stat-number">100+</span>
-          <span class="stat-label">Peças entregues</span>
-        </div>
-        <div class="stat">
-          <span class="stat-number">💯</span>
-          <span class="stat-label">Feito à mão</span>
-        </div>
-        <div class="stat">
-          <span class="stat-number">🇧🇷</span>
-          <span class="stat-label">Envio nacional</span>
+        <div class="stat" v-for="i in [1, 2, 3]" :key="i" v-show="$site.s['stat' + i + 'Number']">
+          <span class="stat-number">{{ $site.s['stat' + i + 'Number'] }}</span>
+          <span class="stat-label">{{ $site.s['stat' + i + 'Label'] }}</span>
         </div>
       </div>
 
       <div class="about-social">
         <h3 class="social-heading">Nos siga nas redes!</h3>
         <div class="social-buttons">
-          <a href="https://instagram.com/fiosmjcroche" target="_blank" rel="noopener" class="social-btn instagram">
-            📸 @fiosmjcroche
+          <a :href="$site.igUrl" target="_blank" rel="noopener" class="social-btn instagram">
+            📸 {{ $site.igHandle }}
           </a>
-          <a href="https://wa.me/5533999892409" target="_blank" rel="noopener" class="social-btn whatsapp">
+          <a :href="$site.wa()" target="_blank" rel="noopener" class="social-btn whatsapp">
             💬 WhatsApp
           </a>
         </div>

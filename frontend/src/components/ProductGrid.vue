@@ -21,9 +21,9 @@
       </div>
 
       <div class="products-cta">
-        <p>Não encontrou o que procura? Fazemos peças personalizadas! 💬</p>
+        <p>{{ $site.s.customOrderText }}</p>
         <a
-          href="https://wa.me/5533999892409?text=Olá! Gostaria de solicitar uma peça personalizada de crochê 😊"
+          :href="$site.wa('Olá! Gostaria de solicitar uma peça personalizada de crochê 😊')"
           target="_blank"
           rel="noopener"
           class="btn-pink"

@@ -32,6 +32,7 @@ public class SecurityConfig {
                     "/api/auth/**",
                     "/api/products/**",
                     "/api/health",
+                    "/api/site",
                     "/api/checkout/**",
                     "/api/checkout/webhook",
                     "/api/blog/**",

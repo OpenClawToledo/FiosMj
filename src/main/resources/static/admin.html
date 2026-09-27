@@ -64,6 +64,11 @@
     .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .check input { width: auto; margin: 0; }
 
+    .fieldset { background: white; border-radius: 12px; box-shadow: 0 1px 6px #0001; padding: 18px; margin-bottom: 16px; }
+    .fieldset h3 { color: #8B4513; font-size: 1rem; margin-bottom: 14px; }
+    .fieldset label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #555; }
+    .row2 { display: grid; grid-template-columns: 1fr 2fr; gap: 0 12px; }
+    @media (max-width: 560px) { .row2 { grid-template-columns: 1fr; } }
     .alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
     .alert-success { background: #c6f6d5; color: #276749; }
     .alert-error { background: #fed7d7; color: #9b2c2c; }
@@ -94,6 +99,7 @@
       <button data-tab="blog" onclick="showTab('blog')">📝 Blog</button>
       <button data-tab="testimonials" onclick="showTab('testimonials')">💬 Depoimentos</button>
       <button data-tab="newsletter" onclick="showTab('newsletter')">📧 Newsletter</button>
+      <button data-tab="site" onclick="showTab('site')">⚙️ Site</button>
     </nav>
     <div id="alert-box" style="display:none"></div>
 
@@ -121,6 +127,18 @@
         <button class="btn-outline btn-sm" onclick="loadTestimonials()">↻ Atualizar</button>
       </div>
       <div id="testimonials-container"><div class="spinner">Carregando...</div></div>
+    </section>
+
+    <section id="tab-site" style="display:none">
+      <div class="toolbar">
+        <h2>Textos e contatos do site</h2>
+        <button class="btn-primary btn-sm" onclick="saveSite()">💾 Salvar alterações</button>
+      </div>
+      <p class="hint" style="margin:0 0 16px">Deixe um campo vazio para voltar ao texto original. Use **palavra** para negrito nos textos do "Sobre".</p>
+      <div id="site-container"><div class="spinner">Carregando...</div></div>
+      <div style="text-align:right;margin-top:16px">
+        <button class="btn-primary" onclick="saveSite()">💾 Salvar alterações</button>
+      </div>
     </section>
 
     <section id="tab-newsletter" style="display:none">
@@ -261,10 +279,10 @@
 
   function showTab(tab) {
     document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    ['products', 'blog', 'testimonials', 'newsletter'].forEach(t => $('tab-' + t).style.display = t === tab ? 'block' : 'none');
+    ['products', 'blog', 'testimonials', 'newsletter', 'site'].forEach(t => $('tab-' + t).style.display = t === tab ? 'block' : 'none');
     if (!loaded[tab]) {
       loaded[tab] = true;
-      ({ products: loadProducts, blog: loadPosts, testimonials: loadTestimonials, newsletter: loadNewsletter })[tab]();
+      ({ products: loadProducts, blog: loadPosts, testimonials: loadTestimonials, newsletter: loadNewsletter, site: loadSite })[tab]();
     }
   }
 
@@ -519,6 +537,81 @@
   async function rejectTestimonial(id) {
     if (!confirm('Recusar e apagar este depoimento?')) return;
     try { await api(`/api/social/admin/testimonials/${id}`, { method: 'DELETE' }); showAlert('Depoimento removido'); loadTestimonials(); } catch (e) { fail(e); }
+  }
+
+  // ── Site (textos e contatos) ──────────────────────────────────────────────
+  const SITE_FIELDS = [
+    ['📞 Contatos', [
+      ['whatsapp', 'WhatsApp (só números, com 55 e DDD)', 'input', 'Ex: 5533999892409'],
+      ['whatsappDisplay', 'WhatsApp como aparece no site', 'input', 'Ex: (33) 99989-2409'],
+      ['instagram', 'Instagram (sem @)', 'input', 'Ex: fiosmjcroche'],
+      ['facebook', 'Link do Facebook (vazio = esconder)', 'input'],
+      ['location', 'Localização', 'input'],
+    ]],
+    ['🏠 Topo do site', [
+      ['heroTitle', 'Título', 'input'],
+      ['heroTagline', 'Frase de destaque', 'input'],
+      ['heroSubtitle', 'Subtítulo', 'input'],
+    ]],
+    ['💗 Sobre nós', [
+      ['aboutTitle', 'Título', 'input'],
+      ['aboutSubtitle', 'Subtítulo', 'input'],
+      ['aboutText1', 'Parágrafo 1', 'textarea'],
+      ['aboutText2', 'Parágrafo 2', 'textarea'],
+      ['aboutHighlight', 'Frase final em destaque', 'input'],
+      ['stat', 'Números em destaque', 'stats'],
+    ]],
+    ['📦 Como encomendar', [
+      ['howSubtitle', 'Subtítulo', 'input'],
+      ['step', 'Passos', 'steps'],
+    ]],
+    ['🛍️ Produtos', [
+      ['customOrderText', 'Texto do pedido personalizado (abaixo dos produtos)', 'input'],
+    ]],
+    ['⬇️ Rodapé', [
+      ['footerBio', 'Descrição (cada linha aparece numa linha)', 'textarea'],
+      ['footerCopyright', 'Linha de direitos autorais', 'input'],
+    ]],
+  ];
+
+  function siteInput(key, type, value, placeholder = '') {
+    const v = esc(value ?? '');
+    return type === 'textarea'
+      ? `<textarea data-key="${key}" rows="3">${v}</textarea>`
+      : `<input data-key="${key}" value="${v}" placeholder="${esc(placeholder)}"/>`;
+  }
+
+  function renderSite(data) {
+    $('site-container').innerHTML = SITE_FIELDS.map(([title, fields]) => `
+      <div class="fieldset"><h3>${title}</h3>
+        ${fields.map(([key, label, type, ph]) => {
+          if (type === 'stats') return `<label>${label}</label>` + [1, 2, 3].map(i => `
+            <div class="row2">${siteInput('stat' + i + 'Number', 'input', data['stat' + i + 'Number'], 'Número/emoji')}
+            ${siteInput('stat' + i + 'Label', 'input', data['stat' + i + 'Label'], 'Legenda')}</div>`).join('');
+          if (type === 'steps') return [1, 2, 3].map(i => `
+            <label>Passo ${i} — título</label>${siteInput('step' + i + 'Title', 'input', data['step' + i + 'Title'])}
+            <label>Passo ${i} — descrição</label>${siteInput('step' + i + 'Desc', 'textarea', data['step' + i + 'Desc'])}`).join('');
+          return `<label>${label}</label>${siteInput(key, type, data[key], ph)}`;
+        }).join('')}
+      </div>`).join('');
+  }
+
+  async function loadSite() {
+    $('site-container').innerHTML = '<div class="spinner">Carregando...</div>';
+    try {
+      const r = await fetch('/api/site');
+      renderSite(await r.json());
+    } catch (e) { $('site-container').innerHTML = ''; fail(e); }
+  }
+
+  async function saveSite() {
+    const body = {};
+    document.querySelectorAll('#site-container [data-key]').forEach(el => body[el.dataset.key] = el.value);
+    try {
+      const data = await api('/api/admin/site', { method: 'PUT', json: body });
+      renderSite(data);
+      showAlert('Site atualizado ✅ As mudanças já aparecem no site.');
+    } catch (e) { fail(e); }
   }
 
   // ── Newsletter ────────────────────────────────────────────────────────────

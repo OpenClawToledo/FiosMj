@@ -3,10 +3,7 @@
     <div class="container footer-inner">
       <div class="footer-brand">
         <div class="footer-logo">🧶 <span>Fios MJ</span></div>
-        <p class="footer-bio">
-          💗 Crochê artesanal | Mãe &amp; Filha<br>
-          🧶 Peças sob encomenda 🎁
-        </p>
+        <p class="footer-bio" v-html="$site.rich($site.s.footerBio)"></p>
       </div>
 
       <div class="footer-nav">
@@ -26,21 +23,21 @@
 
       <div class="footer-contact">
         <h4>Contato</h4>
-        <a href="https://wa.me/5533999892409" target="_blank" rel="noopener">
-          💬 (33) 99989-2409
+        <a :href="$site.wa()" target="_blank" rel="noopener">
+          💬 {{ $site.s.whatsappDisplay }}
         </a>
-        <a href="https://instagram.com/fiosmjcroche" target="_blank" rel="noopener">
-          📸 @fiosmjcroche
+        <a :href="$site.igUrl" target="_blank" rel="noopener">
+          📸 {{ $site.igHandle }}
         </a>
-        <a href="https://facebook.com/fiosmjcroche" target="_blank" rel="noopener">
+        <a v-if="$site.s.facebook" :href="$site.s.facebook" target="_blank" rel="noopener">
           👍 Facebook
         </a>
-        <span class="location">📍 Minas Gerais, Brasil</span>
+        <span class="location" v-if="$site.s.location">📍 {{ $site.s.location }}</span>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <p>© 2026 Fios MJ · Crochê Artesanal · Feito com 💗</p>
+      <p>{{ $site.s.footerCopyright }}</p>
     </div>
   </footer>
 </template>

@@ -67,8 +67,7 @@ export default {
   computed: {
     whatsappUrl() {
       const name = this.product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim()
-      const msg = encodeURIComponent(`Olá! Tenho interesse no produto: ${name}. Pode me dar mais informações? 🧶`)
-      return `https://wa.me/5533999892409?text=${msg}`
+      return this.$site.wa(`Olá! Tenho interesse no produto: ${name}. Pode me dar mais informações? 🧶`)
     }
   },
   methods: {

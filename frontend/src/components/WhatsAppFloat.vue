@@ -1,6 +1,6 @@
 <template>
   <a
-    href="https://wa.me/5533999892409?text=Olá! Vi o site da Fios MJ e gostaria de mais informações 🧶"
+    :href="$site.wa('Olá! Vi o site da Fios MJ e gostaria de mais informações 🧶')"
     target="_blank"
     rel="noopener"
     class="whatsapp-float"

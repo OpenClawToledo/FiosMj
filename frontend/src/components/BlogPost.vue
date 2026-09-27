@@ -29,10 +29,10 @@
         <div class="post-footer">
           <button class="btn-back-bottom" @click="$emit('go-back')">← Voltar ao Blog</button>
           <a
-            href="https://instagram.com/fiosmjcroche"
+            :href="$site.igUrl"
             target="_blank" rel="noopener"
             class="btn-instagram"
-          >📸 Seguir @fiosmjcroche</a>
+          >📸 Seguir {{ $site.igHandle }}</a>
         </div>
       </article>
     </div>

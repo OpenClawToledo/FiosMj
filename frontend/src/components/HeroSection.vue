@@ -30,12 +30,12 @@
     <!-- Conteúdo -->
     <div class="container hero-inner">
       <div class="hero-content fade-in">
-        <h1 class="hero-title">Fios MJ</h1>
-        <p class="hero-tagline">💗 Crochê artesanal | Mãe & Filha 🧶</p>
-        <p class="hero-subtitle">Peças sob encomenda feitas com amor e dedicação 🎁</p>
+        <h1 class="hero-title">{{ $site.s.heroTitle }}</h1>
+        <p class="hero-tagline">{{ $site.s.heroTagline }}</p>
+        <p class="hero-subtitle">{{ $site.s.heroSubtitle }}</p>
         <div class="hero-actions">
           <a href="#produtos" class="btn-pink">✨ Ver Produtos</a>
-          <a href="https://wa.me/5533999892409?text=Olá! Vi o site e gostaria de saber mais sobre as peças de crochê 🧶"
+          <a :href="$site.wa('Olá! Vi o site e gostaria de saber mais sobre as peças de crochê 🧶')"
              target="_blank" rel="noopener" class="btn-whatsapp">
             💬 Fale Conosco
           </a>

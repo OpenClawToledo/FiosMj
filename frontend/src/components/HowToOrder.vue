@@ -4,7 +4,7 @@
       <p class="section-eyebrow">📦 Simples e rápido</p>
       <h2 class="section-title">Como Encomendar</h2>
       <p class="section-subtitle">
-        Em apenas 3 passos você tem sua peça artesanal exclusiva!
+        {{ site.s.howSubtitle }}
       </p>
 
       <div class="steps-grid">
@@ -18,7 +18,7 @@
 
       <div class="how-cta">
         <a
-          href="https://wa.me/5533999892409?text=Olá!%20Quero%20fazer%20uma%20encomenda%20na%20Fios%20MJ%20🧶"
+          :href="site.wa('Olá! Quero fazer uma encomenda na Fios MJ 🧶')"
           target="_blank"
           rel="noopener noreferrer"
           class="btn-primary"
@@ -31,23 +31,15 @@
 </template>
 
 <script setup>
-const steps = [
-  {
-    icon: '👀',
-    title: 'Escolha sua peça',
-    desc: 'Navegue pelo catálogo e escolha o produto que você quer. Pode ser do catálogo ou uma peça personalizada!',
-  },
-  {
-    icon: '💬',
-    title: 'Fale pelo WhatsApp',
-    desc: 'Clique em "Pedir" e você será direcionada ao nosso WhatsApp com a mensagem já pronta. É fácil!',
-  },
-  {
-    icon: '🎁',
-    title: 'Receba com amor',
-    desc: 'Combinamos prazo e pagamento, e sua peça é feita com todo carinho. Entregamos em todo o Brasil!',
-  },
-]
+import { computed } from 'vue'
+import { site } from '../store/site'
+
+const icons = ['👀', '💬', '🎁']
+const steps = computed(() => icons.map((icon, i) => ({
+  icon,
+  title: site.s[`step${i + 1}Title`],
+  desc: site.s[`step${i + 1}Desc`],
+})).filter(st => st.title))
 </script>
 
 <style scoped>

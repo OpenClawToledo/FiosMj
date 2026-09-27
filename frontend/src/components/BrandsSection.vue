@@ -24,10 +24,10 @@
               <span class="brand-tag">🌿 100% algodão</span>
             </div>
             <div class="brand-social">
-              <a href="https://instagram.com/fiosmjcroche" target="_blank" rel="noopener" class="social-link instagram">
-                📸 @fiosmjcroche
+              <a :href="$site.igUrl" target="_blank" rel="noopener" class="social-link instagram">
+                📸 {{ $site.igHandle }}
               </a>
-              <a href="https://wa.me/5533999892409" target="_blank" rel="noopener" class="social-link whatsapp">
+              <a :href="$site.wa()" target="_blank" rel="noopener" class="social-link whatsapp">
                 💬 Fale Conosco
               </a>
             </div>
