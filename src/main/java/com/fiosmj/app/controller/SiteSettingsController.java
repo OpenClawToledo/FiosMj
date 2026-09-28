@@ -27,6 +27,8 @@ public class SiteSettingsController {
         DEFAULTS.put("heroTitle", "Fios MJ");
         DEFAULTS.put("heroTagline", "💗 Crochê artesanal | Mãe & Filha 🧶");
         DEFAULTS.put("heroSubtitle", "Peças sob encomenda feitas com amor e dedicação 🎁");
+        // Natal (aparece de 15/11 a 06/01)
+        DEFAULTS.put("natalAviso", "Natal feito à mão · encomendas até 10/12");
         // Sobre
         DEFAULTS.put("aboutTitle", "💗 Sobre a Fios MJ");
         DEFAULTS.put("aboutSubtitle", "Conheça nossa história");
