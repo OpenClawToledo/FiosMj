@@ -4,7 +4,8 @@
       <img :src="product.imageUrl" :alt="product.name" class="product-image" loading="lazy" />
       <span class="product-category">{{ product.category }}</span>
       <span v-if="product.stock === 0" class="stock-badge out">Esgotado</span>
-      <span v-else-if="product.stock <= 3" class="stock-badge low">⚡ Últimas unidades!</span>
+      <span v-else-if="product.stock != null && product.stock <= 3 && status.cls === 'ready'" class="stock-badge low">⚡ Últimas unidades!</span>
+      <span v-else class="avail-badge" :class="status.cls">{{ status.icon }} {{ status.label }}</span>
     </div>
     <div class="product-info">
       <h3 class="product-name">{{ product.name }}</h3>
@@ -16,12 +17,16 @@
           {{ s.size }} — R${{ s.price.toFixed(0) }}
         </span>
       </div>
+      <div v-else-if="product.availability === 'SOB_CONSULTA'" class="product-price consult">
+        Preço sob consulta
+      </div>
       <div v-else class="product-price">
         R$ {{ product.price.toFixed(2).replace('.', ',') }}
       </div>
+      <p v-if="product.leadTime && status.cls !== 'off'" class="lead-time">⏱️ Prazo: {{ product.leadTime }}</p>
 
       <!-- Size selector for products with sizes -->
-      <div v-if="product.sizes && product.sizes.length" class="size-select-wrap" @click.stop>
+      <div v-if="buyable && product.sizes && product.sizes.length" class="size-select-wrap" @click.stop>
         <label class="size-select-label">Tamanho para compra:</label>
         <select v-model="selectedSize" class="size-select">
           <option value="" disabled>Selecione o tamanho</option>
@@ -38,12 +43,13 @@
 
       <!-- Add to cart button -->
       <button
+        v-if="product.availability !== 'SOB_CONSULTA'"
         class="btn-buy btn-order"
-        :class="{ added: justAdded, disabled: product.stock === 0 }"
-        :disabled="product.stock === 0"
+        :class="{ added: justAdded, disabled: !buyable }"
+        :disabled="!buyable"
         @click.stop="handleAddToCart"
       >
-        {{ product.stock === 0 ? '❌ Esgotado' : justAdded ? 'Adicionado! ✓' : '🛍️ Adicionar ao carrinho' }}
+        {{ product.stock === 0 ? '❌ Esgotado' : !buyable ? '⏸️ Indisponível no momento' : justAdded ? 'Adicionado! ✓' : '🛍️ Adicionar ao carrinho' }}
       </button>
     </div>
   </div>
@@ -51,6 +57,7 @@
 
 <script>
 import { useCart } from '../store/cart.js'
+import { availabilityOf, canBuy, productLink } from '../store/availability.js'
 
 export default {
   name: 'ProductCard',
@@ -65,9 +72,11 @@ export default {
     }
   },
   computed: {
+    status() { return availabilityOf(this.product) },
+    buyable() { return canBuy(this.product) },
     whatsappUrl() {
       const name = this.product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim()
-      return this.$site.wa(`Olá! Tenho interesse no produto: ${name}. Pode me dar mais informações? 🧶`)
+      return this.$site.wa(`Olá! Tenho interesse no produto: ${name}. Pode me dar mais informações? 🧶\n${productLink(this.product)}`)
     }
   },
   methods: {
@@ -75,7 +84,7 @@ export default {
       this.$emit('open-product', this.product)
     },
     handleAddToCart() {
-      if (this.product.stock === 0) return
+      if (!this.buyable) return
       if (this.product.sizes && this.product.sizes.length && !this.selectedSize) {
         alert('Por favor, selecione um tamanho antes de adicionar ao carrinho.')
         return
@@ -143,6 +152,30 @@ export default {
 }
 .stock-badge.out { background: #ff5252; color: white; }
 .stock-badge.low { background: #ff9800; color: white; }
+
+.avail-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.94);
+  color: #555;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+.avail-badge.ready { background: #2e7d32; color: white; }
+.avail-badge.order { color: var(--pink-dark); }
+.avail-badge.ask { background: #fff3e0; color: #e65100; }
+.avail-badge.off { background: #9e9e9e; color: white; }
+
+.lead-time {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin: -8px 0 14px;
+}
+.product-price.consult { font-size: 1.1rem; }
 
 .product-card { cursor: pointer; }
 

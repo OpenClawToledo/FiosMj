@@ -9,16 +9,23 @@ Produção: **https://fiosmj.com** · Painel: **https://fiosmj.com/admin**
 
 ## Painel admin (`/admin`)
 
-Entre com a senha definida em `ADMIN_SECRET`. O painel tem quatro abas:
+Entre com a senha definida em `ADMIN_SECRET`. O painel tem cinco abas:
 
 | Aba | O que dá para fazer |
 |---|---|
-| **Produtos** | criar, editar, ocultar/mostrar, apagar; tamanhos com preço; envio de foto |
+| **Produtos** | criar, editar, ocultar/mostrar, apagar; tamanhos com preço; envio de foto; disponibilidade (pronta entrega, sob encomenda, sob consulta, indisponível) e prazo de produção |
 | **Blog** | criar, editar, publicar/despublicar, apagar posts; capa com envio de foto; texto simples (`## Subtítulo`, `- item`) ou HTML |
 | **Depoimentos** | aprovar, aprovar com destaque ou recusar depoimentos enviados pelas clientes |
 | **Newsletter** | ver inscritas e exportar CSV |
+| **Site** | textos do topo, Sobre, Como encomendar, rodapé, aviso de Natal e contatos (WhatsApp, Instagram, Facebook) |
 
 As fotos enviadas ficam em `/uploads/<categoria>/…`, no volume de dados.
+
+### SEO e compartilhamento
+
+- `https://fiosmj.com/produto/<id>` e `https://fiosmj.com/blog/<slug>` abrem direto no produto/post e mostram foto, título e descrição próprios quando o link é colado no WhatsApp, Instagram ou Facebook.
+- `/sitemap.xml` é gerado na hora com todos os produtos visíveis e posts publicados.
+- A página do produto tem o botão **Compartilhar**, e a mensagem do WhatsApp já leva o link do produto.
 
 ---
 
@@ -54,7 +61,7 @@ O Nginx é **o do host**, compartilhado com os outros sites da KVM. O projeto n�
 
 ```bash
 mkdir -p /opt/apps && cd /opt/apps
-git clone https://github.com/<conta>/FiosMJ.git fiosmj && cd fiosmj
+git clone https://github.com/OpenClawToledo/FiosMj.git fiosmj && cd fiosmj
 cp .env.example .env && nano .env        # JWT_SECRET, ADMIN_SECRET, MP_*
 docker volume create fiosmj_data >/dev/null
 docker compose up -d --build

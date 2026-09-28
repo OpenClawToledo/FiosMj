@@ -18,6 +18,9 @@ import java.util.*;
 @RequestMapping("/api/admin/products")
 public class ProductAdminController {
 
+    private static final Set<String> AVAILABILITY =
+            Set.of("PRONTA_ENTREGA", "SOB_ENCOMENDA", "SOB_CONSULTA", "INDISPONIVEL");
+
     private final ProductRepository productRepository;
     private final ProductController productController; // reutiliza toMap()
     private final ObjectMapper objectMapper;
@@ -121,6 +124,16 @@ public class ProductAdminController {
         if (body.containsKey("imageUrl"))    p.setImageUrl((String) body.get("imageUrl"));
         if (body.containsKey("category"))    p.setCategory((String) body.get("category"));
         if (body.containsKey("active"))      p.setActive(Boolean.TRUE.equals(body.get("active")));
+        if (body.containsKey("availability")) {
+            Object a = body.get("availability");
+            String v = a == null ? null : a.toString().trim().toUpperCase();
+            p.setAvailability(v != null && AVAILABILITY.contains(v) ? v : null);
+        }
+        if (body.containsKey("leadTime")) {
+            Object lt = body.get("leadTime");
+            String v = lt == null ? null : lt.toString().trim();
+            p.setLeadTime(v == null || v.isEmpty() ? null : v.substring(0, Math.min(v.length(), 60)));
+        }
 
         if (body.containsKey("price"))
             p.setPrice(((Number) body.get("price")).doubleValue());

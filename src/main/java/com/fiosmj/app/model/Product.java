@@ -31,6 +31,13 @@ public class Product {
 
     private Integer stock;
 
+    /** PRONTA_ENTREGA, SOB_ENCOMENDA, SOB_CONSULTA ou INDISPONIVEL (vazio = SOB_ENCOMENDA) */
+    private String availability;
+
+    /** Prazo de produção mostrado na loja, ex.: "7 a 10 dias úteis" */
+    @Column(name = "lead_time")
+    private String leadTime;
+
     @Column(name = "display_order")
     private Integer displayOrder = 0;
 
@@ -85,6 +92,12 @@ public class Product {
 
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
+
+    public String getAvailability() { return availability; }
+    public void setAvailability(String availability) { this.availability = availability; }
+
+    public String getLeadTime() { return leadTime; }
+    public void setLeadTime(String leadTime) { this.leadTime = leadTime; }
 
     public Integer getDisplayOrder() { return displayOrder; }
     public void setDisplayOrder(Integer displayOrder) { this.displayOrder = displayOrder; }

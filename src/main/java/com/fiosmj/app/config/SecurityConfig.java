@@ -54,6 +54,7 @@ public class SecurityConfig {
                     "/admin",
                     "/obrigado", "/pendente",
                     "/politica-de-privacidade", "/termos-e-condicoes", "/contacto",
+                    "/produto/*", "/blog/*",
                     "/assets/**", "/img/**", "/uploads/**",
                     "/*.js", "/*.css", "/*.ico", "/*.png", "/*.jpg", "/*.svg",
                     "/sitemap.xml", "/robots.txt", "/favicon.ico"

@@ -16,7 +16,7 @@
           <div class="main-image-wrap">
             <img :src="product.imageUrl" :alt="product.name" class="main-image" />
             <span v-if="product.stock === 0" class="stock-badge out">Esgotado</span>
-            <span v-else-if="product.stock <= 3" class="stock-badge low">⚡ Últimas unidades!</span>
+            <span v-else-if="product.stock != null && product.stock <= 3" class="stock-badge low">⚡ Últimas unidades!</span>
           </div>
         </div>
 
@@ -25,10 +25,18 @@
           <span class="product-category-tag">{{ product.category }}</span>
           <h1 class="product-title">{{ product.name }}</h1>
 
+          <div class="avail-row">
+            <span class="avail-pill" :class="status.cls">{{ status.icon }} {{ status.label }}</span>
+            <span v-if="product.leadTime && status.cls !== 'off'" class="lead-time">⏱️ Prazo: {{ product.leadTime }}</span>
+          </div>
+
           <!-- Price -->
           <div v-if="product.sizes && product.sizes.length" class="product-price-wrap">
             <span class="price-from">A partir de</span>
             <span class="product-price">R$ {{ minPrice }}</span>
+          </div>
+          <div v-else-if="product.availability === 'SOB_CONSULTA'" class="product-price-wrap">
+            <span class="product-price consult">Preço sob consulta</span>
           </div>
           <div v-else class="product-price-wrap">
             <span class="product-price">R$ {{ product.price.toFixed(2).replace('.', ',') }}</span>
@@ -37,7 +45,7 @@
           <p class="product-description">{{ product.description }}</p>
 
           <!-- Sizes -->
-          <div v-if="product.sizes && product.sizes.length" class="size-selector">
+          <div v-if="buyable && product.sizes && product.sizes.length" class="size-selector">
             <label class="size-label">Tamanho:</label>
             <div class="size-options">
               <button
@@ -56,16 +64,20 @@
           <!-- Actions -->
           <div class="product-actions">
             <button
+              v-if="product.availability !== 'SOB_CONSULTA'"
               class="btn-add-cart"
-              :disabled="product.stock === 0"
-              :class="{ added: justAdded, disabled: product.stock === 0 }"
+              :disabled="!buyable"
+              :class="{ added: justAdded, disabled: !buyable }"
               @click="handleAddToCart"
             >
-              {{ product.stock === 0 ? '❌ Esgotado' : justAdded ? '✓ Adicionado!' : '🛍️ Adicionar ao Carrinho' }}
+              {{ product.stock === 0 ? '❌ Esgotado' : !buyable ? '⏸️ Indisponível no momento' : justAdded ? '✓ Adicionado!' : '🛍️ Adicionar ao Carrinho' }}
             </button>
             <a :href="whatsappUrl" target="_blank" rel="noopener" class="btn-whatsapp">
-              💬 Pedir pelo WhatsApp
+              💬 {{ product.availability === 'SOB_CONSULTA' ? 'Consultar preço pelo WhatsApp' : 'Pedir pelo WhatsApp' }}
             </a>
+            <button class="btn-share" @click="shareProduct">
+              {{ copied ? '✓ Link copiado!' : '🔗 Compartilhar' }}
+            </button>
           </div>
 
           <!-- Stock info -->
@@ -108,6 +120,7 @@
 
 <script>
 import { useCart } from '../store/cart.js'
+import { availabilityOf, canBuy, productLink } from '../store/availability.js'
 
 export default {
   name: 'ProductPage',
@@ -119,11 +132,14 @@ export default {
     return {
       selectedSize: null,
       justAdded: false,
+      copied: false,
       reviews: [],
       loadingReviews: true
     }
   },
   computed: {
+    status() { return availabilityOf(this.product) },
+    buyable() { return canBuy(this.product) },
     minPrice() {
       if (!this.product.sizes || !this.product.sizes.length) return ''
       const min = Math.min(...this.product.sizes.map(s => s.price))
@@ -131,11 +147,23 @@ export default {
     },
     whatsappUrl() {
       const name = this.product.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim()
-      return this.$site.wa(`Olá! Tenho interesse no produto: ${name}. Pode me dar mais informações? 🧶`)
+      return this.$site.wa(`Olá! Tenho interesse no produto: ${name}. Pode me dar mais informações? 🧶\n${productLink(this.product)}`)
     }
   },
   methods: {
+    async shareProduct() {
+      const url = productLink(this.product)
+      if (navigator.share) {
+        try { await navigator.share({ title: this.product.name, url }); return } catch (e) { if (e?.name === 'AbortError') return }
+      }
+      try {
+        await navigator.clipboard.writeText(url)
+        this.copied = true
+        setTimeout(() => { this.copied = false }, 2000)
+      } catch { window.prompt('Copie o link do produto:', url) }
+    },
     handleAddToCart() {
+      if (!this.buyable) return
       if (this.product.sizes && this.product.sizes.length && !this.selectedSize) {
         alert('Por favor, selecione um tamanho.')
         return
@@ -342,6 +370,40 @@ export default {
 }
 
 .btn-whatsapp:hover { opacity: 0.9; }
+
+.btn-share {
+  padding: 12px;
+  background: white;
+  color: var(--pink-dark, #c2185b);
+  border: 2px solid #fce4f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.btn-share:hover { background: #fce4f0; }
+
+.avail-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 14px;
+}
+.avail-pill {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: #fce4f0;
+  color: #c2185b;
+}
+.avail-pill.ready { background: #e8f5e9; color: #2e7d32; }
+.avail-pill.ask { background: #fff3e0; color: #e65100; }
+.avail-pill.off { background: #eeeeee; color: #757575; }
+.lead-time { font-size: 0.88rem; color: #888; }
+.product-price.consult { font-size: 1.3rem; }
 
 .stock-info {
   font-size: 0.88rem;

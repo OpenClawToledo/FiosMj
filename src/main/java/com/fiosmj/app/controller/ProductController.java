@@ -48,6 +48,9 @@ public class ProductController {
         m.put("imageUrl", p.getImageUrl());
         m.put("category", p.getCategory());
         m.put("stock", p.getStock());
+        m.put("availability", p.getAvailability() == null || p.getAvailability().isBlank()
+                ? "SOB_ENCOMENDA" : p.getAvailability());
+        m.put("leadTime", p.getLeadTime());
         m.put("displayOrder", p.getDisplayOrder());
         m.put("active", p.isActive());
         m.put("createdAt", p.getCreatedAt());

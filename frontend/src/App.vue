@@ -278,6 +278,13 @@ export default {
       ]
     }
 
+    // Links compartilháveis (/produto/5, /blog/slug) viram a rota interna (#/produto/5)
+    const path = window.location.pathname
+    const shared = path.match(/^\/(produto|blog)\/([^/]+)\/?$/)
+    if (shared && !window.location.hash) {
+      history.replaceState(null, '', '/#/' + shared[1] + '/' + shared[2])
+    }
+
     // Hash routing
     this.parseHash()
     window.addEventListener('hashchange', this.parseHash)

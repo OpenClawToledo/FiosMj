@@ -12,6 +12,18 @@
       </button>
     </div>
 
+    <div class="filter-status">
+      <button
+        v-for="opt in statusOptions"
+        :key="opt.value"
+        class="status-chip"
+        :class="{ active: selectedStatus === opt.value }"
+        @click="selectedStatus = opt.value"
+      >
+        {{ opt.label }}
+      </button>
+    </div>
+
     <div class="filter-sort">
       <label class="sort-label">Ordenar:</label>
       <select v-model="sortBy" class="sort-select">
@@ -33,16 +45,30 @@ export default {
   data() {
     return {
       selectedCategory: 'Todos',
+      selectedStatus: 'ALL',
+      statusOptions: [
+        { value: 'ALL', label: 'Todas' },
+        { value: 'PRONTA_ENTREGA', label: '✅ Pronta entrega' },
+        { value: 'SOB_ENCOMENDA', label: '🧶 Sob encomenda' }
+      ],
       sortBy: 'relevance',
-      categories: ['Todos', 'Roupas', 'Amigurumi', 'Acessórios']
     }
   },
   computed: {
+    // Categorias que existem nos produtos (inclui as novas criadas no painel)
+    categories() {
+      const cats = [...new Set(this.products.map(p => p.category).filter(Boolean))]
+      return ['Todos', ...cats]
+    },
     filteredProducts() {
       let list = [...this.products]
 
       if (this.selectedCategory !== 'Todos') {
         list = list.filter(p => p.category === this.selectedCategory)
+      }
+
+      if (this.selectedStatus !== 'ALL') {
+        list = list.filter(p => (p.availability || 'SOB_ENCOMENDA') === this.selectedStatus)
       }
 
       if (this.sortBy === 'price-asc') {
@@ -110,6 +136,30 @@ export default {
 .cat-chip.active {
   background: #e91e7b;
   border-color: #e91e7b;
+  color: white;
+}
+
+.filter-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.status-chip {
+  padding: 5px 12px;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+  color: #555;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.status-chip.active {
+  background: #2e7d32;
+  border-color: #2e7d32;
   color: white;
 }
 

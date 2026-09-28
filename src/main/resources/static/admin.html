@@ -173,6 +173,15 @@
       <button class="btn-outline btn-sm" onclick="pickImage('p')">📷 Enviar</button>
     </div>
     <img id="p-preview" class="img-preview" alt=""/>
+    <label>Disponibilidade</label>
+    <select id="p-avail">
+      <option value="SOB_ENCOMENDA">🧶 Sob encomenda</option>
+      <option value="PRONTA_ENTREGA">✅ Pronta entrega</option>
+      <option value="SOB_CONSULTA">💬 Sob consulta (esconde o preço)</option>
+      <option value="INDISPONIVEL">⏸️ Indisponível (não vende)</option>
+    </select>
+    <label>Prazo de produção</label>
+    <input id="p-lead" type="text" maxlength="60" placeholder="Ex.: 7 a 10 dias úteis (opcional)"/>
     <label>Estoque</label>
     <input id="p-stock" type="number" min="0" placeholder="Deixe vazio se for sob encomenda"/>
     <label>Ordem de exibição</label>
@@ -323,6 +332,10 @@
   }
 
   // ── Produtos ──────────────────────────────────────────────────────────────
+  const AVAIL_LABEL = {
+    PRONTA_ENTREGA: '✅ Pronta entrega', SOB_ENCOMENDA: '🧶 Sob encomenda',
+    SOB_CONSULTA: '💬 Sob consulta', INDISPONIVEL: '⏸️ Indisponível'
+  };
   async function loadProducts() {
     $('products-container').innerHTML = '<div class="spinner">Carregando...</div>';
     try {
@@ -334,7 +347,8 @@
           <img src="${esc(p.imageUrl)}" alt="" loading="lazy" onerror="this.removeAttribute('src')"/>
           <div class="info">
             <div class="name">${esc(p.name)}${p.active ? '' : '<span class="tag tag-off">oculto</span>'}</div>
-            <div class="meta">${esc(p.category || '—')} · Estoque: ${p.stock ?? '—'} · Ordem: ${p.displayOrder ?? 0}</div>
+            <div class="meta">${esc(p.category || '—')} · ${AVAIL_LABEL[p.availability] || AVAIL_LABEL.SOB_ENCOMENDA}${p.leadTime ? ' · ' + esc(p.leadTime) : ''}</div>
+            <div class="meta">Estoque: ${p.stock ?? '—'} · Ordem: ${p.displayOrder ?? 0}</div>
             <div class="price">R$ ${(p.price || 0).toFixed(2).replace('.', ',')}</div>
             ${p.sizes && p.sizes.length ? '<div class="meta">Tamanhos: ' + p.sizes.map(s => esc(s.size) + ' → R$' + s.price).join(', ') + '</div>' : ''}
           </div>
@@ -358,6 +372,8 @@
     $('p-cat').value = p.category || '';
     $('p-img').value = p.imageUrl || '';
     $('p-stock').value = p.stock ?? '';
+    $('p-avail').value = p.availability || 'SOB_ENCOMENDA';
+    $('p-lead').value = p.leadTime || '';
     $('p-order').value = p.displayOrder ?? '';
     $('p-active').checked = id ? p.active !== false : true;
     $('sizes-container').innerHTML = '';
@@ -377,6 +393,8 @@
       category: $('p-cat').value,
       imageUrl: $('p-img').value.trim(),
       stock: $('p-stock').value !== '' ? parseInt($('p-stock').value) : null,
+      availability: $('p-avail').value,
+      leadTime: $('p-lead').value.trim(),
       displayOrder: parseInt($('p-order').value) || 0,
       active: $('p-active').checked,
       sizes: sizes.length ? sizes : null,
