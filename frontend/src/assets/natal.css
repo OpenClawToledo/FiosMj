@@ -1,0 +1,52 @@
+/* ──────────────────────────────────────────────────
+   Tema de Natal — ativo quando <html class="theme-natal">
+   Troca as variáveis da paleta; os componentes herdam.
+   ────────────────────────────────────────────────── */
+html.theme-natal {
+  --pink-primary:  #A8323E;   /* vermelho-vinho */
+  --pink-dark:     #6E1F2A;   /* vinho escuro */
+  --pink-light:    #F6E4DF;
+  --pink-soft:     #C4555E;
+  --pink-bg:       #FBF6EE;   /* creme (igual ao atual) */
+
+  --gold:          #C9A227;   /* dourado */
+  --gold-dark:     #957614;
+  --lace:          #E6D6B8;
+
+  --pine:          #2F5D50;   /* verde-pinho */
+  --pine-dark:     #1F4238;
+
+  --shadow:        0 4px 20px rgba(110, 31, 42, 0.16);
+  --shadow-hover:  0 8px 30px rgba(110, 31, 42, 0.28);
+}
+
+/* Cabeçalho: fio vermelho e verde por baixo */
+html.theme-natal .header {
+  border-bottom: 3px solid transparent;
+  border-image: repeating-linear-gradient(90deg, #A8323E 0 18px, #FBF6EE 18px 24px, #2F5D50 24px 42px, #FBF6EE 42px 48px) 3;
+}
+
+/* Hero: sobreposição vinho → pinho → dourado */
+html.theme-natal .hero .vintage-overlay {
+  background: linear-gradient(
+    160deg,
+    rgba(110, 31, 42, 0.74) 0%,
+    rgba(80, 40, 44, 0.55) 45%,
+    rgba(47, 93, 80, 0.55) 80%,
+    rgba(201, 162, 39, 0.30) 100%
+  );
+}
+html.theme-natal .hero .bg-col,
+html.theme-natal .hero .bg-tile { background-color: #6E1F2A; }
+html.theme-natal .hero .hero-tagline { color: #F7E3B5; }
+
+/* Títulos de secção com detalhe dourado */
+html.theme-natal .section-title::after {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 3px;
+  margin: 10px auto 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--pine), var(--gold), var(--pink-primary));
+}

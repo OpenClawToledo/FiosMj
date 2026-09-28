@@ -1,6 +1,7 @@
 <template>
   <div id="fiosmj-app">
     <VisitCounter />
+    <ThemePreviewBadge />
     <SocialProof :user-name="authState && authState.customer ? authState.customer.name : null" />
 
     <!-- ─── PRODUCT PAGE ─── -->
@@ -137,6 +138,7 @@ import BlogPost from './components/BlogPost.vue'
 import VisitCounter from './components/VisitCounter.vue'
 import SocialProof from './components/SocialProof.vue'
 import BrandsSection from './components/BrandsSection.vue'
+import ThemePreviewBadge from './components/ThemePreviewBadge.vue'
 import { useAuth } from './store/auth.js'
 
 export default {
@@ -162,7 +164,8 @@ export default {
     BlogPost,
     VisitCounter,
     SocialProof,
-    BrandsSection
+    BrandsSection,
+    ThemePreviewBadge
   },
   setup() {
     const auth = useAuth()

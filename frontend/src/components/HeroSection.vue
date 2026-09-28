@@ -27,9 +27,14 @@
       <div class="grain"></div>
     </div>
 
+    <Snowfall v-if="theme.natal" />
+
     <!-- Conteúdo -->
     <div class="container hero-inner">
       <div class="hero-content fade-in">
+        <p v-if="theme.natal" class="natal-pill">
+          🎁 {{ $site.s.natalAviso || 'Natal feito à mão · encomendas até 10/12' }}
+        </p>
         <h1 class="hero-title">{{ $site.s.heroTitle }}</h1>
         <p class="hero-tagline">{{ $site.s.heroTagline }}</p>
         <p class="hero-subtitle">{{ $site.s.heroSubtitle }}</p>
@@ -42,7 +47,7 @@
         </div>
       </div>
       <div class="hero-decoration">
-        <div class="yarn-ball">🧶</div>
+        <div class="yarn-ball" :class="{ 'is-natal': theme.natal }">{{ theme.natal ? '🎄' : '🧶' }}</div>
       </div>
     </div>
 
@@ -50,8 +55,15 @@
 </template>
 
 <script>
+import Snowfall from './Snowfall.vue'
+import { theme } from '../store/theme.js'
+
 export default {
   name: 'HeroSection',
+  components: { Snowfall },
+  setup() {
+    return { theme }
+  },
   data() {
     return {
       imgs: [
@@ -216,7 +228,27 @@ export default {
   filter: drop-shadow(0 10px 30px rgba(233, 30, 123, 0.5));
 }
 
+.yarn-ball.is-natal {
+  filter: drop-shadow(0 10px 30px rgba(201, 162, 39, 0.55));
+}
+
+/* ── Natal ── */
+.natal-pill {
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 6px 16px;
+  border-radius: 50px;
+  background: rgba(251, 246, 238, 0.14);
+  border: 1px solid rgba(247, 227, 181, 0.55);
+  color: #F7E3B5;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+}
+
 @media (max-width: 768px) {
+  .natal-pill { font-size: 0.8rem; }
   .hero-title { font-size: 2.4rem; }
   .hero-tagline { font-size: 1.05rem; }
   .hero-subtitle { font-size: 1rem; margin-bottom: 24px; }
