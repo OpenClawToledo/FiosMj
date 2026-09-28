@@ -40,8 +40,18 @@ public class AuthController {
         String password = body.get("password");
 
         if (name == null || email == null || password == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "name, email e password são obrigatórios"));
+            return ResponseEntity.badRequest().body(Map.of("error", "Nome, e-mail e senha são obrigatórios"));
         }
+        name = name.trim();
+        email = email.toLowerCase().trim();
+        if (name.isEmpty() || name.length() > 100)
+            return ResponseEntity.badRequest().body(Map.of("error", "Informe um nome válido"));
+        if (email.length() > 150 || !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))
+            return ResponseEntity.badRequest().body(Map.of("error", "Informe um e-mail válido"));
+        if (password.length() < 8 || password.length() > 128)
+            return ResponseEntity.badRequest().body(Map.of("error", "A senha precisa ter pelo menos 8 caracteres"));
+        if (!"true".equals(String.valueOf(body.get("acceptTerms"))))
+            return ResponseEntity.badRequest().body(Map.of("error", "É preciso aceitar os termos e a política de privacidade"));
 
         if (customerRepository.findByEmail(email).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "E-mail já cadastrado"));
@@ -49,7 +59,9 @@ public class AuthController {
 
         Customer customer = new Customer();
         customer.setName(name);
-        customer.setEmail(email.toLowerCase().trim());
+        customer.setEmail(email);
+        customer.setRankingOptIn("true".equals(String.valueOf(body.get("rankingOptIn"))));
+        customer.setTermsAcceptedAt(java.time.LocalDateTime.now());
         customer.setPhone(phone);
         customer.setPasswordHash(passwordEncoder.encode(password));
         customerRepository.save(customer);
@@ -65,7 +77,7 @@ public class AuthController {
         // Rate limiting — máximo 5 tentativas por IP em 15 minutos
         if (!rateLimiter.isAllowed(ip)) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                    .body(Map.of("error", "Demasiadas tentativas. Tente novamente em 15 minutos."));
+                    .body(Map.of("error", "Muitas tentativas. Tente novamente em 15 minutos."));
         }
 
         String email = body.get("email");

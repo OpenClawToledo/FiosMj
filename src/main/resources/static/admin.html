@@ -559,6 +559,12 @@
 
   // ── Site (textos e contatos) ──────────────────────────────────────────────
   const SITE_FIELDS = [
+    ['⚖️ Dados da loja (obrigatório por lei — aparecem no rodapé, nos termos e na privacidade)', [
+      ['lojaNome', 'Nome ou razão social', 'input', 'Ex: Maria J. Silva ou Fios MJ Artesanato LTDA'],
+      ['lojaDocumento', 'CNPJ ou CPF', 'input', 'Ex: 12.345.678/0001-90'],
+      ['lojaEndereco', 'Endereço (cidade e UF, no mínimo)', 'input', 'Ex: Rua X, 123 – Centro – Teófilo Otoni/MG'],
+      ['lojaEmail', 'E-mail de atendimento e privacidade', 'input', 'Ex: contato@fiosmj.com'],
+    ]],
     ['📞 Contatos', [
       ['whatsapp', 'WhatsApp (só números, com 55 e DDD)', 'input', 'Ex: 5533999892409'],
       ['whatsappDisplay', 'WhatsApp como aparece no site', 'input', 'Ex: (33) 99989-2409'],
@@ -603,7 +609,12 @@
   }
 
   function renderSite(data) {
-    $('site-container').innerHTML = SITE_FIELDS.map(([title, fields]) => `
+    const missing = [['lojaDocumento', 'CNPJ ou CPF'], ['lojaEndereco', 'endereço'], ['lojaEmail', 'e-mail']]
+      .filter(([k]) => !(data[k] || '').trim()).map(([, l]) => l);
+    const warn = missing.length
+      ? `<div class="empty" style="background:#fff3e0;color:#e65100;text-align:left">⚠️ Falta preencher: <strong>${missing.join(', ')}</strong>. Loja online precisa mostrar esses dados (Decreto 7.962/2013).</div>`
+      : '';
+    $('site-container').innerHTML = warn + SITE_FIELDS.map(([title, fields]) => `
       <div class="fieldset"><h3>${title}</h3>
         ${fields.map(([key, label, type, ph]) => {
           if (type === 'stats') return `<label>${label}</label>` + [1, 2, 3].map(i => `

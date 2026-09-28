@@ -107,7 +107,7 @@ docker compose up -d
 
 | Variável | Obrigatória | Para quê |
 |---|---|---|
-| `JWT_SECRET` | sim | login das clientes (`openssl rand -hex 32`) |
+| `JWT_SECRET` | sim | login das clientes (`openssl rand -hex 32`); mín. 32 caracteres, sem ela o app não sobe |
 | `ADMIN_SECRET` | sim | senha do `/admin` (mín. 12 caracteres, sem ela o admin fica bloqueado) |
 | `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY` | para vender | Mercado Pago |
 | `BREVO_API_KEY`, `BREVO_LIST_ID` | não | sincronizar newsletter com a Brevo |

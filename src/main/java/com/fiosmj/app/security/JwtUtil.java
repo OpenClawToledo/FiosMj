@@ -18,6 +18,15 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long expiration;
 
+    /** Sem chave forte o app não sobe: evita tokens forjáveis com a chave padrão. */
+    @jakarta.annotation.PostConstruct
+    void checkSecret() {
+        if (secret == null || secret.isBlank() || secret.startsWith("CHANGE_ME") || secret.length() < 32) {
+            throw new IllegalStateException(
+                "JWT_SECRET ausente ou fraco. Gere com: openssl rand -hex 32 e coloque no .env");
+        }
+    }
+
     private SecretKey getKey() {
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         // Ensure key is at least 256 bits for HS256

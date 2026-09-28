@@ -80,23 +80,15 @@ public class SocialController {
         List<Map<String, Object>> ranking = new ArrayList<>();
 
         for (Customer c : customers) {
+            // LGPD: só aparece quem autorizou no cadastro; nunca valores gastos, produtos ou cidade
+            if (!c.isRankingOptIn()) continue;
             List<Order> orders = orderRepo.findByCustomerIdOrderByCreatedAtDesc(c.getId());
-            if (orders.isEmpty()) continue;
-
-            long orderCount = orders.size();
-            double totalSpent = orders.stream().mapToDouble(Order::getTotalAmount).sum();
-            String lastProduct = orders.stream()
-                .max(Comparator.comparing(Order::getCreatedAt))
-                .map(Order::getItemsSummary)
-                .orElse("");
+            long orderCount = orders.stream().filter(o -> o.getStatus() == Order.Status.CONFIRMED).count();
+            if (orderCount == 0) continue;
 
             Map<String, Object> entry = new LinkedHashMap<>();
-            // Mostrar só primeiro nome + inicial do sobrenome por privacidade
             entry.put("displayName", maskName(c.getName()));
-            entry.put("city", maskCity(c.getCity()));
             entry.put("orderCount", orderCount);
-            entry.put("totalSpent", totalSpent);
-            entry.put("lastProduct", lastProduct);
             entry.put("badge", getBadge(orderCount));
             ranking.add(entry);
         }

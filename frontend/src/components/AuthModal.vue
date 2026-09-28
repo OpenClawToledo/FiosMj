@@ -45,8 +45,16 @@
             </div>
             <div class="form-group">
               <label>Senha</label>
-              <input v-model="registerForm.password" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
+              <input v-model="registerForm.password" type="password" placeholder="Mínimo 8 caracteres" minlength="8" required />
             </div>
+            <label class="consent">
+              <input v-model="registerForm.acceptTerms" type="checkbox" required />
+              <span>Li e aceito os <a href="/termos-e-condicoes" target="_blank" rel="noopener">termos</a> e a <a href="/politica-de-privacidade" target="_blank" rel="noopener">política de privacidade</a>.</span>
+            </label>
+            <label class="consent">
+              <input v-model="registerForm.rankingOptIn" type="checkbox" />
+              <span>Quero aparecer no ranking de clientes (só primeiro nome e inicial). Opcional.</span>
+            </label>
             <p v-if="error" class="error-msg">{{ error }}</p>
             <button type="submit" class="btn-primary" :disabled="loading">
               <span v-if="loading" class="spinner">⟳</span>
@@ -78,7 +86,7 @@ export default {
       loading: false,
       error: '',
       loginForm: { email: '', password: '' },
-      registerForm: { name: '', email: '', phone: '', password: '' }
+      registerForm: { name: '', email: '', phone: '', password: '', acceptTerms: false, rankingOptIn: false }
     }
   },
   methods: {
@@ -104,7 +112,8 @@ export default {
           this.registerForm.name,
           this.registerForm.email,
           this.registerForm.phone,
-          this.registerForm.password
+          this.registerForm.password,
+          { acceptTerms: this.registerForm.acceptTerms, rankingOptIn: this.registerForm.rankingOptIn }
         )
         await this.loadFromServer()
         this.$emit('logged-in')
@@ -264,4 +273,17 @@ export default {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.consent {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 0.82rem;
+  color: #666;
+  margin: 4px 0 10px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.consent input { margin-top: 3px; flex-shrink: 0; width: auto; }
+.consent a { color: #e91e7b; }
 </style>

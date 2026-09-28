@@ -3,12 +3,12 @@
 
     <!-- Bolhas de visitantes activos (canto esquerdo) -->
     <div class="active-bubbles" v-if="visitors.length > 0">
-      <div class="bubble-label">{{ count }} a ver agora</div>
+      <div class="bubble-label">{{ count }} vendo agora</div>
       <div class="bubble-stack">
         <transition-group name="bubble-pop" tag="div" class="bubble-row">
           <div
-            v-for="v in visitors.slice(0, 6)"
-            :key="v.sessionId"
+            v-for="(v, i) in visitors.slice(0, 6)"
+            :key="i"
             class="visitor-bubble"
             :style="{ background: v.color }"
             :title="v.label"

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
+import java.util.Map;
 import java.nio.charset.StandardCharsets;
 
 @Controller
@@ -28,7 +29,33 @@ public class PageController {
                 .replace("__WA_URL__", "https://wa.me/" + wa)
                 .replace("__WA_DISPLAY__", esc(s.getOrDefault("whatsappDisplay", "")))
                 .replace("__IG_URL__", "https://instagram.com/" + esc(ig))
-                .replace("__IG_HANDLE__", "@" + esc(ig));
+                .replace("__IG_HANDLE__", "@" + esc(ig))
+                .replace("__LOJA_BLOCK__", lojaBlock(s))
+                .replace("__LOJA_NOME__", esc(s.getOrDefault("lojaNome", "Fios MJ")))
+                .replace("__CONTATO_PRIVACIDADE__", contatoPrivacidade(s, wa));
+    }
+
+    /** Identificação obrigatória da loja (Decreto 7.962/2013): nome, CNPJ/CPF, endereço e contato. */
+    private static String lojaBlock(Map<String, String> s) {
+        StringBuilder b = new StringBuilder("<ul>");
+        b.append("<li><strong>Loja:</strong> ").append(esc(s.getOrDefault("lojaNome", "Fios MJ"))).append("</li>");
+        String doc = s.getOrDefault("lojaDocumento", "");
+        if (!doc.isBlank()) b.append("<li><strong>CNPJ/CPF:</strong> ").append(esc(doc)).append("</li>");
+        String end = s.getOrDefault("lojaEndereco", "");
+        if (!end.isBlank()) b.append("<li><strong>Endereço:</strong> ").append(esc(end)).append("</li>");
+        String mail = s.getOrDefault("lojaEmail", "");
+        if (!mail.isBlank()) b.append("<li><strong>E-mail:</strong> <a href=\"mailto:").append(esc(mail)).append("\">")
+                .append(esc(mail)).append("</a></li>");
+        String wa = s.getOrDefault("whatsappDisplay", "");
+        if (!wa.isBlank()) b.append("<li><strong>WhatsApp:</strong> ").append(esc(wa)).append("</li>");
+        return b.append("</ul>").toString();
+    }
+
+    private static String contatoPrivacidade(Map<String, String> s, String wa) {
+        String mail = s.getOrDefault("lojaEmail", "");
+        String link = "<a href=\"https://wa.me/" + wa + "\">WhatsApp " + esc(s.getOrDefault("whatsappDisplay", "")) + "</a>";
+        if (!mail.isBlank()) link = "<a href=\"mailto:" + esc(mail) + "\">" + esc(mail) + "</a> ou " + link;
+        return link;
     }
 
     private static String esc(String v) {
@@ -107,37 +134,49 @@ public class PageController {
             <body>
               <div class="wrap">
                 <h1>🔒 Política de Privacidade</h1>
-                <p><strong>Última atualização:</strong> Janeiro de 2026</p>
-                <p>A Fios MJ (doravante "nós") está comprometida em proteger a privacidade dos nossos clientes. Esta política descreve como coletamos, usamos e protegemos suas informações.</p>
+                <p><strong>Última atualização:</strong> setembro de 2026</p>
+                <p>Esta política explica como a __LOJA_NOME__ trata os dados pessoais de quem visita e compra no site, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018 — LGPD).</p>
 
-                <h2>1. Dados Coletados</h2>
-                <p>Coletamos os seguintes dados pessoais:</p>
+                <h2>1. Quem é a responsável pelos dados</h2>
+                __LOJA_BLOCK__
+                <p>Para qualquer assunto sobre seus dados, fale com a responsável pelo tratamento: __CONTATO_PRIVACIDADE__.</p>
+
+                <h2>2. Dados que coletamos e para quê</h2>
                 <ul>
-                  <li>Nome completo e endereço de entrega</li>
-                  <li>Número de telefone (WhatsApp) e e-mail</li>
-                  <li>Dados de pagamento (processados pelo Mercado Pago — nunca armazenamos dados de cartão)</li>
-                  <li>Histórico de pedidos e preferências de compra</li>
+                  <li><strong>Cadastro:</strong> nome, e-mail, telefone e senha (guardada de forma criptografada) — para você acompanhar seus pedidos. Base legal: execução de contrato.</li>
+                  <li><strong>Pedido:</strong> nome, telefone, e-mail e endereço de entrega — para produzir, enviar e dar suporte ao pedido. Base legal: execução de contrato.</li>
+                  <li><strong>Pagamento:</strong> feito no ambiente do Mercado Pago. Não recebemos nem guardamos dados de cartão. O CPF, quando informado, é repassado ao Mercado Pago e não fica salvo no nosso sistema.</li>
+                  <li><strong>Newsletter:</strong> e-mail e nome (opcional) — só com o seu consentimento, que pode ser retirado a qualquer momento.</li>
+                  <li><strong>Ranking de clientes:</strong> primeiro nome, inicial do sobrenome e número de pedidos — só para quem marcou essa opção no cadastro.</li>
+                  <li><strong>Depoimentos:</strong> nome e texto que você enviar, publicados só após aprovação.</li>
+                  <li><strong>Mensagens de contato:</strong> nome, contato e mensagem, para responder você.</li>
                 </ul>
 
-                <h2>2. Como Usamos os Dados</h2>
+                <h2>3. Armazenamento no navegador</h2>
+                <p>Não usamos cookies de publicidade. O site guarda no seu navegador (armazenamento local) apenas o necessário para funcionar: sua sessão de login, o carrinho, um identificador anônimo para contar visitas e a preferência do tema. Você pode apagar esses dados nas configurações do navegador.</p>
+
+                <h2>4. Com quem compartilhamos</h2>
+                <p>Não vendemos seus dados. Compartilhamos apenas o necessário com:</p>
                 <ul>
-                  <li>Processar e entregar seus pedidos</li>
-                  <li>Comunicar atualizações de pedidos via WhatsApp</li>
-                  <li>Melhorar nossos produtos e serviços</li>
-                  <li>Cumprir obrigações legais</li>
+                  <li><strong>Mercado Pago</strong> — processamento do pagamento (<a href="https://www.mercadopago.com.br/privacidade" target="_blank" rel="noopener">política do Mercado Pago</a>);</li>
+                  <li><strong>Hostinger</strong> — servidor onde o site e o banco de dados ficam hospedados;</li>
+                  <li><strong>Brevo</strong> — envio da newsletter, apenas para quem se inscreveu;</li>
+                  <li><strong>Correios ou transportadora</strong> — entrega do pedido;</li>
+                  <li>Autoridades, quando exigido por lei.</li>
                 </ul>
 
-                <h2>3. Mercado Pago</h2>
-                <p>Utilizamos o Mercado Pago como plataforma de pagamento. Seus dados financeiros são tratados diretamente pelo Mercado Pago, seguindo sua própria <a href="https://www.mercadopago.com.br/privacidade" target="_blank">política de privacidade</a>.</p>
+                <h2>5. Por quanto tempo guardamos</h2>
+                <ul>
+                  <li>Dados de pedidos: pelo prazo exigido pelas leis fiscais e de defesa do consumidor (em geral, 5 anos).</li>
+                  <li>Cadastro: enquanto a conta existir. Você pode pedir a exclusão a qualquer momento.</li>
+                  <li>Newsletter: até você cancelar a inscrição.</li>
+                </ul>
 
-                <h2>4. Compartilhamento de Dados</h2>
-                <p>Não vendemos nem compartilhamos seus dados pessoais com terceiros, exceto quando necessário para processar pagamentos ou cumprir obrigações legais.</p>
+                <h2>6. Seus direitos</h2>
+                <p>Você pode pedir, a qualquer momento: confirmação e acesso aos seus dados, correção, exclusão, portabilidade, informação sobre com quem compartilhamos e a retirada do consentimento. Respondemos em até 15 dias pelo contato do item 1. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p>
 
-                <h2>5. Seus Direitos (LGPD)</h2>
-                <p>Você tem direito a acessar, corrigir ou solicitar a exclusão dos seus dados. Entre em contato conosco pelo WhatsApp: <a href="__WA_URL__">__WA_DISPLAY__</a>.</p>
-
-                <h2>6. Contato</h2>
-                <p>Dúvidas? Fale conosco: <a href="__WA_URL__">WhatsApp</a> ou <a href="__IG_URL__">Instagram</a>.</p>
+                <h2>7. Segurança</h2>
+                <p>O site usa conexão criptografada (HTTPS), as senhas são guardadas com criptografia e o acesso ao painel é restrito. Nenhum sistema é totalmente imune a falhas; se ocorrer um incidente que traga risco a você, avisaremos você e a ANPD.</p>
 
                 <a href="/" class="back">← Voltar à Loja</a>
               </div>
@@ -172,38 +211,52 @@ public class PageController {
             <body>
               <div class="wrap">
                 <h1>📋 Termos e Condições</h1>
-                <p><strong>Última atualização:</strong> Janeiro de 2026</p>
-                <p>Ao realizar uma compra na Fios MJ, você concorda com os termos abaixo.</p>
+                <p><strong>Última atualização:</strong> setembro de 2026</p>
+                <p>Ao comprar na __LOJA_NOME__, você concorda com os termos abaixo, que seguem o Código de Defesa do Consumidor (Lei 8.078/1990) e o Decreto 7.962/2013.</p>
 
-                <h2>1. Sobre os Produtos</h2>
+                <h2>1. Quem somos</h2>
+                __LOJA_BLOCK__
+
+                <h2>2. Sobre os produtos</h2>
                 <ul>
-                  <li>Todos os produtos são feitos artesanalmente sob encomenda</li>
-                  <li>Pequenas variações na cor e tamanho são normais e fazem parte do charme artesanal</li>
-                  <li>As fotos são representativas; o produto final pode ter pequenas diferenças</li>
+                  <li>As peças são feitas à mão. Cada produto informa se é de <strong>pronta entrega</strong>, <strong>sob encomenda</strong> ou <strong>sob consulta</strong>.</li>
+                  <li><strong>Peças personalizadas</strong> são as feitas com cor, tamanho, nome ou modelo escolhidos por você.</li>
+                  <li>Pequenas variações de cor e medida são próprias do trabalho artesanal. As fotos mostram o modelo; variações grandes serão informadas antes.</li>
                 </ul>
 
-                <h2>2. Prazo de Produção e Entrega</h2>
+                <h2>3. Preço, pagamento e frete</h2>
                 <ul>
-                  <li>Prazo de produção: 7 a 15 dias úteis após confirmação do pagamento</li>
-                  <li>Prazo de entrega via Correios: 5 a 20 dias úteis conforme a região</li>
-                  <li>Você receberá o código de rastreio via WhatsApp</li>
+                  <li>O preço válido é o mostrado na tela de pagamento do Mercado Pago no momento da compra.</li>
+                  <li>Aceitamos PIX, cartão e boleto pelo Mercado Pago. A produção começa após a confirmação do pagamento.</li>
+                  <li>O frete é informado pelo WhatsApp após o pedido, antes do envio.</li>
                 </ul>
 
-                <h2>3. Pagamento</h2>
+                <h2>4. Prazos</h2>
                 <ul>
-                  <li>Aceitamos PIX, cartão de crédito/débito e boleto via Mercado Pago</li>
-                  <li>A produção inicia somente após a confirmação do pagamento</li>
+                  <li>Produção: o prazo aparece em cada produto. Quando não aparecer, é de 7 a 15 dias úteis após a confirmação do pagamento.</li>
+                  <li>Entrega: de acordo com o prazo dos Correios ou da transportadora para a sua região. Enviamos o código de rastreio pelo WhatsApp.</li>
                 </ul>
 
-                <h2>4. Trocas e Devoluções</h2>
+                <h2>5. Direito de arrependimento (7 dias)</h2>
                 <ul>
-                  <li>Aceitamos trocas em caso de defeito de fabricação</li>
-                  <li>Não aceitamos devoluções por arrependimento em produtos personalizados</li>
-                  <li>Para solicitar troca, entre em contato em até 7 dias após o recebimento</li>
+                  <li>Em compras pela internet, você pode desistir em até <strong>7 dias corridos a partir do recebimento</strong> (art. 49 do CDC), sem precisar explicar o motivo.</li>
+                  <li>Nesse caso devolvemos o valor pago, incluindo o frete de envio, pelo mesmo meio de pagamento. A peça deve voltar sem sinais de uso.</li>
+                  <li>Peças <strong>personalizadas</strong> são produzidas exclusivamente para você e não podem ser revendidas. Para elas, combinamos os detalhes e aprovamos o modelo com você antes da produção.</li>
+                  <li>Para desistir, fale conosco pelo contato do item 1 dentro do prazo.</li>
                 </ul>
 
-                <h2>5. Contato</h2>
-                <p>Dúvidas? Fale conosco pelo <a href="__WA_URL__">WhatsApp: __WA_DISPLAY__</a></p>
+                <h2>6. Garantia e defeitos</h2>
+                <ul>
+                  <li>Se a peça chegar com defeito de fabricação ou diferente do combinado, você tem <strong>90 dias a partir do recebimento</strong> para reclamar (art. 26 do CDC).</li>
+                  <li>Resolvemos em até 30 dias com conserto ou troca. Se não for possível, você escolhe entre outra peça, abatimento no preço ou devolução do valor.</li>
+                  <li>Desgaste pelo uso normal e danos por lavagem ou uso inadequado não são defeitos.</li>
+                </ul>
+
+                <h2>7. Cancelamento pela loja</h2>
+                <p>Se não conseguirmos produzir ou entregar o pedido, avisamos você e devolvemos o valor pago integralmente.</p>
+
+                <h2>8. Atendimento</h2>
+                <p>Dúvidas, trocas e reclamações: <a href="__WA_URL__">WhatsApp __WA_DISPLAY__</a>. Respondemos em até 5 dias úteis.</p>
 
                 <a href="/" class="back">← Voltar à Loja</a>
               </div>

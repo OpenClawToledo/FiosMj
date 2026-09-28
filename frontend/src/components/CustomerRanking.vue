@@ -22,10 +22,8 @@
               {{ c.displayName }}
               <span class="rank-badge">{{ c.badge }}</span>
             </div>
-            <div class="rank-city">📍 {{ c.city }}</div>
             <div class="rank-stats">
               <span>🛒 {{ c.orderCount }} {{ c.orderCount === 1 ? 'pedido' : 'pedidos' }}</span>
-              <span v-if="c.lastProduct">· Último: {{ c.lastProduct }}</span>
             </div>
           </div>
         </div>
@@ -40,7 +38,7 @@
 
       <!-- CTA para se registrar -->
       <div class="ranking-cta">
-        <p>Faça parte do ranking — <strong>crie sua conta</strong> e acompanhe suas compras!</p>
+        <p>Quer aparecer aqui? <strong>Crie sua conta</strong> e marque a opção do ranking. Mostramos só o primeiro nome e a inicial.</p>
         <button class="btn-join" @click="$emit('open-auth')">
           👤 Criar conta grátis
         </button>

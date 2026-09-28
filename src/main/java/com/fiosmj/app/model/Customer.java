@@ -32,6 +32,14 @@ public class Customer {
     @Column(name = "email_notifications")
     private boolean emailNotifications = true;
 
+    /** Autorizou aparecer no ranking público de clientes (LGPD: só com consentimento). */
+    @Column(name = "ranking_opt_in")
+    private Boolean rankingOptIn;
+
+    /** Quando aceitou os termos e a política de privacidade no cadastro. */
+    @Column(name = "terms_accepted_at")
+    private LocalDateTime termsAcceptedAt;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -64,4 +72,10 @@ public class Customer {
 
     public boolean isEmailNotifications() { return emailNotifications; }
     public void setEmailNotifications(boolean emailNotifications) { this.emailNotifications = emailNotifications; }
+
+    public boolean isRankingOptIn() { return Boolean.TRUE.equals(rankingOptIn); }
+    public void setRankingOptIn(Boolean rankingOptIn) { this.rankingOptIn = rankingOptIn; }
+
+    public LocalDateTime getTermsAcceptedAt() { return termsAcceptedAt; }
+    public void setTermsAcceptedAt(LocalDateTime termsAcceptedAt) { this.termsAcceptedAt = termsAcceptedAt; }
 }

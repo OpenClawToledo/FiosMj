@@ -23,6 +23,11 @@ public class SiteSettingsController {
         DEFAULTS.put("instagram", "fiosmjcroche");
         DEFAULTS.put("facebook", "https://facebook.com/fiosmjcroche");
         DEFAULTS.put("location", "Minas Gerais, Brasil");
+        // Identificação da loja (obrigatória em loja online — Decreto 7.962/2013)
+        DEFAULTS.put("lojaNome", "Fios MJ");
+        DEFAULTS.put("lojaDocumento", "");
+        DEFAULTS.put("lojaEndereco", "");
+        DEFAULTS.put("lojaEmail", "");
         // Topo
         DEFAULTS.put("heroTitle", "Fios MJ");
         DEFAULTS.put("heroTagline", "💗 Crochê artesanal | Mãe & Filha 🧶");

@@ -10,13 +10,13 @@
           <input
             v-model="name"
             type="text"
-            placeholder="Teu nome (opcional)"
+            placeholder="Seu nome (opcional)"
             class="input-name"
           />
           <input
             v-model="email"
             type="email"
-            placeholder="Teu melhor e-mail *"
+            placeholder="Seu melhor e-mail *"
             required
             class="input-email"
           />
@@ -25,8 +25,12 @@
             <span v-else>Quero receber! →</span>
           </button>
         </div>
+        <label class="nl-consent">
+          <input v-model="consent" type="checkbox" required />
+          <span>Aceito receber novidades por e-mail e li a <a href="/politica-de-privacidade" target="_blank" rel="noopener">política de privacidade</a>.</span>
+        </label>
         <p v-if="error" class="nl-error">{{ error }}</p>
-        <p class="nl-privacy">Sem spam. Podes cancelar quando quiseres. 🔒</p>
+        <p class="nl-privacy">Sem spam. Você pode cancelar quando quiser. 🔒</p>
       </form>
 
       <div v-else class="success-msg">
@@ -44,6 +48,7 @@ export default {
     return {
       name: '',
       email: '',
+      consent: false,
       loading: false,
       success: false,
       successMessage: '',
@@ -58,17 +63,17 @@ export default {
         const res = await fetch('/api/newsletter/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: this.email, name: this.name || null })
+          body: JSON.stringify({ email: this.email, name: this.name || null, consent: this.consent })
         })
         const data = await res.json()
         if (res.ok && data.success) {
           this.success = true
           this.successMessage = data.message || 'Inscrita com sucesso! 💕'
         } else {
-          this.error = data.error || 'Erro ao subscrever. Tenta novamente.'
+          this.error = data.error || 'Erro ao inscrever. Tente novamente.'
         }
       } catch {
-        this.error = 'Erro de conexão. Tenta novamente.'
+        this.error = 'Erro de conexão. Tente novamente.'
       } finally {
         this.loading = false
       }
@@ -180,4 +185,18 @@ export default {
   .input-name, .input-email { max-width: 100%; }
   .newsletter-title { font-size: 1.4rem; }
 }
+
+.nl-consent {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: flex-start;
+  font-size: 0.82rem;
+  opacity: 0.9;
+  margin-top: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.nl-consent input { margin-top: 3px; }
+.nl-consent a { color: inherit; text-decoration: underline; }
 </style>

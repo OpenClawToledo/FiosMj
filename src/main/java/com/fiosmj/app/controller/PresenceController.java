@@ -27,12 +27,19 @@ public class PresenceController {
     @PostMapping("/ping")
     public ResponseEntity<Map<String, Object>> ping(@RequestBody Map<String, String> body) {
         String sessionId = body.getOrDefault("sessionId", UUID.randomUUID().toString());
-        String displayName = body.getOrDefault("displayName", null);
+        // LGPD: não mostramos nomes de quem está no site; o nome enviado é ignorado
+        String displayName = null;
+        if (sessionId.length() > 64) sessionId = sessionId.substring(0, 64);
         String color = body.getOrDefault("color", randomColor());
 
         // Cleanup expired
         long now = Instant.now().toEpochMilli();
         activeVisitors.entrySet().removeIf(e -> now - e.getValue().timestamp > EXPIRY_MS);
+
+        // Limite de memória contra envio em massa de sessões falsas
+        if (!activeVisitors.containsKey(sessionId) && activeVisitors.size() >= 500) {
+            return ResponseEntity.ok(Map.of("activeCount", (long) activeVisitors.size(), "sessionId", sessionId));
+        }
 
         // Upsert
         VisitorInfo info = activeVisitors.getOrDefault(sessionId, new VisitorInfo());
@@ -56,13 +63,12 @@ public class PresenceController {
             .limit(8)
             .map(v -> {
                 Map<String, String> m = new HashMap<>();
-                m.put("sessionId", v.sessionId);
                 m.put("initial", v.displayName != null && !v.displayName.isBlank()
                     ? String.valueOf(v.displayName.trim().charAt(0)).toUpperCase()
                     : "👀");
                 m.put("label", v.displayName != null && !v.displayName.isBlank()
-                    ? maskName(v.displayName) + " está a ver"
-                    : "Alguém está a ver");
+                    ? maskName(v.displayName) + " está vendo"
+                    : "Alguém está vendo");
                 m.put("color", v.color);
                 return m;
             })
@@ -79,15 +85,14 @@ public class PresenceController {
         java.time.LocalDateTime since = java.time.LocalDateTime.now().minusHours(6);
         List<Map<String, String>> result = orderRepository.findAll().stream()
             .filter(o -> o.getCreatedAt() != null && o.getCreatedAt().isAfter(since))
-            .filter(o -> "PAID".equals(o.getStatus()) || "CONFIRMED".equals(o.getStatus()))
+            .filter(o -> o.getStatus() == com.fiosmj.app.model.Order.Status.CONFIRMED)
             .sorted(Comparator.comparing(com.fiosmj.app.model.Order::getCreatedAt,
                 Comparator.nullsLast(Comparator.reverseOrder())))
             .limit(5)
             .map(o -> {
                 Map<String, String> m = new HashMap<>();
-                String custName = o.getCustomer() != null && o.getCustomer().getName() != null
-                    ? o.getCustomer().getName() : (o.getName() != null ? o.getName() : "Alguém");
-                String customer = maskName(custName);
+                // LGPD: aviso anônimo, sem nome da cliente
+                String customer = "Uma cliente";
                 String product = o.getItems() != null && !o.getItems().isEmpty()
                     ? o.getItems().get(0).getProductName()
                     : "uma peça";

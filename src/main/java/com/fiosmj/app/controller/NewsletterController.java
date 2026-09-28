@@ -40,12 +40,22 @@ public class NewsletterController {
         String email = body.get("email");
         String name  = body.get("name");
 
-        if (email == null || email.isBlank() || !email.contains("@")) {
+        if (email == null || email.isBlank() || !email.contains("@") || email.length() > 150) {
             return ResponseEntity.badRequest().body(Map.of("error", "E-mail inválido"));
         }
+        // LGPD: inscrição só com consentimento explícito
+        if (!"true".equals(String.valueOf(body.get("consent")))) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Marque a opção de aceite para receber as novidades"));
+        }
+        if (name != null && name.length() > 100) name = name.substring(0, 100);
 
-        // Verificar se já existe
-        if (repo.findByEmail(email.toLowerCase().trim()).isPresent()) {
+        // Verificar se já existe (reativa quem tinha cancelado)
+        var existing = repo.findByEmail(email.toLowerCase().trim());
+        if (existing.isPresent()) {
+            if (!existing.get().isActive()) {
+                existing.get().setActive(true);
+                repo.save(existing.get());
+            }
             return ResponseEntity.ok(Map.of("success", true, "message", "Você já está inscrita! 💕"));
         }
 
@@ -62,7 +72,7 @@ public class NewsletterController {
         }
 
         return ResponseEntity.ok(Map.of("success", true,
-            "message", "Inscrita com sucesso! Em breve receberás novidades da Fios MJ 💕🧶"));
+            "message", "Inscrita com sucesso! Em breve você vai receber novidades da Fios MJ 💕🧶"));
     }
 
     /** Cancelar subscrição */
@@ -73,7 +83,7 @@ public class NewsletterController {
             .map(sub -> {
                 sub.setActive(false);
                 repo.save(sub);
-                return ResponseEntity.ok(Map.of("success", true, "message", "Subscrição cancelada."));
+                return ResponseEntity.ok(Map.of("success", true, "message", "Inscrição cancelada."));
             })
             .orElse(ResponseEntity.ok(Map.of("success", true)));
     }

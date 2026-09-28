@@ -38,6 +38,9 @@
 
     <div class="footer-bottom">
       <p>{{ $site.s.footerCopyright }}</p>
+      <p class="footer-id">
+        {{ $site.s.lojaNome }}<template v-if="$site.s.lojaDocumento"> · CNPJ/CPF {{ $site.s.lojaDocumento }}</template><template v-if="$site.s.lojaEndereco"> · {{ $site.s.lojaEndereco }}</template><template v-if="$site.s.lojaEmail"> · <a :href="'mailto:' + $site.s.lojaEmail">{{ $site.s.lojaEmail }}</a></template>
+      </p>
     </div>
   </footer>
 </template>
@@ -145,4 +148,11 @@ export default { name: 'AppFooter' }
     align-items: center;
   }
 }
+
+.footer-id {
+  font-size: 0.78rem;
+  opacity: 0.7;
+  margin-top: 6px;
+}
+.footer-id a { color: inherit; }
 </style>
