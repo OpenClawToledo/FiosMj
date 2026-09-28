@@ -4,6 +4,7 @@ import com.fiosmj.app.model.Customer;
 import com.fiosmj.app.model.Order;
 import com.fiosmj.app.model.OrderItem;
 import com.fiosmj.app.repository.OrderRepository;
+import com.fiosmj.app.service.PricingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,11 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderRepository orderRepository;
+    private final PricingService pricing;
 
-    public OrderController(OrderRepository orderRepository) {
+    public OrderController(OrderRepository orderRepository, PricingService pricing) {
         this.orderRepository = orderRepository;
+        this.pricing = pricing;
     }
 
     @GetMapping
@@ -36,6 +39,11 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<?> createOrder(@AuthenticationPrincipal Customer customer, @RequestBody Map<String, Object> body) {
         if (customer == null) return ResponseEntity.status(401).body(Map.of("error", "Não autenticado"));
+        try {
+            repriceItems(body);
+        } catch (PricingService.PricingException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
         Order order = buildOrderFromBody(body, customer);
         orderRepository.save(order);
         return ResponseEntity.ok(orderToMap(order));
@@ -57,6 +65,33 @@ public class OrderController {
                 return ResponseEntity.ok(orderToMap(o));
             })
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    /** Troca preço e total enviados pelo navegador pelos valores do banco. */
+    @SuppressWarnings("unchecked")
+    private void repriceItems(Map<String, Object> body) {
+        Object raw = body.get("items");
+        if (!(raw instanceof List<?> list) || list.isEmpty() || list.size() > 50)
+            throw new PricingService.PricingException("Carrinho vazio ou inválido.");
+        double total = 0;
+        List<Map<String, Object>> fixed = new ArrayList<>();
+        for (Object o : list) {
+            if (!(o instanceof Map<?, ?> m)) throw new PricingService.PricingException("Item inválido.");
+            Map<String, Object> item = (Map<String, Object>) m;
+            Long productId = item.get("productId") instanceof Number n ? n.longValue() : null;
+            Integer qty = item.get("quantity") instanceof Number n ? n.intValue() : null;
+            String size = item.get("selectedSize") != null ? item.get("selectedSize").toString() : null;
+            PricingService.PricedItem p = pricing.price(productId, size, qty);
+            Map<String, Object> clean = new LinkedHashMap<>();
+            clean.put("productName", p.title());
+            clean.put("price", p.unitPrice());
+            clean.put("quantity", p.quantity());
+            clean.put("selectedSize", p.size());
+            fixed.add(clean);
+            total += p.subtotal();
+        }
+        body.put("items", fixed);
+        body.put("totalAmount", Math.round(total * 100) / 100.0);
     }
 
     public static Order buildOrderFromBody(Map<String, Object> body, Customer customer) {

@@ -240,7 +240,8 @@ export default {
             productId: i.product.id,
             productName: i.product.name + (i.selectedSize ? ` (${i.selectedSize.size})` : ''),
             price: i.price,
-            quantity: i.quantity
+            quantity: i.quantity,
+            selectedSize: i.selectedSize?.size || null
           })),
           payer: {
             name: this.form.name,
@@ -274,6 +275,7 @@ export default {
               city: this.form.city, state: this.form.state,
               totalAmount: this.total,
               items: this.items.map(i => ({
+                productId: i.product.id,
                 productName: i.product.name + (i.selectedSize ? ` (${i.selectedSize.size})` : ''),
                 price: i.price, quantity: i.quantity,
                 selectedSize: i.selectedSize?.size || null

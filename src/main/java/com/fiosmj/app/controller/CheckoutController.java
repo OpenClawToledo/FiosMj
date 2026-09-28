@@ -6,6 +6,9 @@ import com.fiosmj.app.model.Order;
 import com.fiosmj.app.repository.CustomerRepository;
 import com.fiosmj.app.repository.OrderRepository;
 import com.fiosmj.app.security.JwtUtil;
+import com.fiosmj.app.service.PricingService;
+import com.fiosmj.app.service.PricingService.PricedItem;
+import com.fiosmj.app.service.PricingService.PricingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -25,24 +28,40 @@ public class CheckoutController {
     private final JwtUtil jwtUtil;
     private final CustomerRepository customerRepository;
     private final OrderRepository orderRepository;
+    private final PricingService pricing;
 
-    public CheckoutController(JwtUtil jwtUtil, CustomerRepository customerRepository, OrderRepository orderRepository) {
+    public CheckoutController(JwtUtil jwtUtil, CustomerRepository customerRepository,
+                              OrderRepository orderRepository, PricingService pricing) {
         this.jwtUtil = jwtUtil;
         this.customerRepository = customerRepository;
         this.orderRepository = orderRepository;
+        this.pricing = pricing;
     }
 
     @PostMapping("/preference")
     public ResponseEntity<?> createPreference(
             @RequestBody CheckoutRequest req,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        // Preços sempre do banco: o valor mandado pelo navegador é ignorado
+        if (req.getItems() == null || req.getItems().isEmpty() || req.getItems().size() > 50)
+            return ResponseEntity.badRequest().body(Map.of("error", "Carrinho vazio ou inválido."));
+        final List<PricedItem> priced;
+        try {
+            priced = req.getItems().stream()
+                    .map(i -> pricing.price(i.getProductId(), i.getSelectedSize(), i.getQuantity()))
+                    .collect(Collectors.toList());
+        } catch (PricingException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+
         try {
             // Build items list for MP
-            List<Map<String, Object>> mpItems = req.getItems().stream().map(item -> {
+            List<Map<String, Object>> mpItems = priced.stream().map(item -> {
                 Map<String, Object> mpItem = new LinkedHashMap<>();
-                mpItem.put("title", item.getProductName() != null ? item.getProductName() : "Produto Fios MJ");
-                mpItem.put("quantity", item.getQuantity() != null ? item.getQuantity() : 1);
-                mpItem.put("unit_price", item.getPrice() != null ? item.getPrice() : 0.0);
+                mpItem.put("id", String.valueOf(item.product().getId()));
+                mpItem.put("title", item.title());
+                mpItem.put("quantity", item.quantity());
+                mpItem.put("unit_price", item.unitPrice());
                 mpItem.put("currency_id", "BRL");
                 return mpItem;
             }).collect(Collectors.toList());
@@ -132,17 +151,15 @@ public class CheckoutController {
                                 orderData.put("city", req.getAddress().getCity());
                                 orderData.put("state", req.getAddress().getState());
                             }
-                            double total = req.getItems().stream()
-                                .mapToDouble(i -> (i.getPrice() != null ? i.getPrice() : 0) * (i.getQuantity() != null ? i.getQuantity() : 1))
-                                .sum();
+                            double total = priced.stream().mapToDouble(PricedItem::subtotal).sum();
                             orderData.put("totalAmount", total);
 
-                            List<Map<String, Object>> itemsList = req.getItems().stream().map(i -> {
+                            List<Map<String, Object>> itemsList = priced.stream().map(i -> {
                                 Map<String, Object> im = new LinkedHashMap<>();
-                                im.put("productName", i.getProductName());
-                                im.put("price", i.getPrice());
-                                im.put("quantity", i.getQuantity());
-                                im.put("selectedSize", i.getSelectedSize());
+                                im.put("productName", i.title());
+                                im.put("price", i.unitPrice());
+                                im.put("quantity", i.quantity());
+                                im.put("selectedSize", i.size());
                                 return im;
                             }).collect(Collectors.toList());
                             orderData.put("items", itemsList);
@@ -164,7 +181,7 @@ public class CheckoutController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", e.getMessage()));
+                .body(Map.of("error", "Não foi possível iniciar o pagamento. Tente de novo em instantes."));
         }
     }
 }
