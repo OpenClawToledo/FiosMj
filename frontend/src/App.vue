@@ -2,6 +2,7 @@
   <div id="fiosmj-app">
     <VisitCounter />
     <ThemePreviewBadge />
+    <InstallPrompt />
     <SocialProof :user-name="authState && authState.customer ? authState.customer.name : null" />
 
     <!-- ─── PRODUCT PAGE ─── -->
@@ -124,6 +125,7 @@ import HowToOrder from './components/HowToOrder.vue'
 import AboutSection from './components/AboutSection.vue'
 import AppFooter from './components/AppFooter.vue'
 import WhatsAppFloat from './components/WhatsAppFloat.vue'
+import InstallPrompt from './components/InstallPrompt.vue'
 import CartDrawer from './components/CartDrawer.vue'
 import CheckoutForm from './components/CheckoutForm.vue'
 import AuthModal from './components/AuthModal.vue'
@@ -151,6 +153,7 @@ export default {
     AboutSection,
     AppFooter,
     WhatsAppFloat,
+    InstallPrompt,
     CartDrawer,
     CheckoutForm,
     AuthModal,

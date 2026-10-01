@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
+    List<Order> findTop200ByOrderByCreatedAtDesc();
     List<Order> findByStatusAndCreatedAtBefore(Order.Status status, LocalDateTime dateTime);
     Optional<Order> findByPreferenceId(String preferenceId);
 }

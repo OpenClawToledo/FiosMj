@@ -27,3 +27,8 @@ data/
 backups/
 ssl/
 *.pid
+
+# Gerados no build do frontend (vêm de frontend/public)
+src/main/resources/static/icons/
+src/main/resources/static/sw.js
+src/main/resources/static/manifest.webmanifest

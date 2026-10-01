@@ -2,9 +2,17 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <meta name="robots" content="noindex, nofollow"/>
-  <title>Fios MJ — Admin</title>
+  <title>Painel Fios MJ</title>
+  <!-- App instalável no celular ("Painel Fios MJ") -->
+  <link rel="manifest" href="/admin.webmanifest"/>
+  <meta name="theme-color" content="#8B4513"/>
+  <link rel="apple-touch-icon" href="/icons/admin-apple-touch-icon.png"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="Painel MJ"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #fdf6f0; color: #333; }
@@ -73,6 +81,55 @@
     .alert-success { background: #c6f6d5; color: #276749; }
     .alert-error { background: #fed7d7; color: #9b2c2c; }
     .empty, .spinner { text-align: center; padding: 50px; color: #888; }
+
+    /* Pedidos */
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .chip { background: white; border: 1.5px solid #ecdccf; color: #8B4513; border-radius: 20px; padding: 6px 14px; font-size: .85rem; }
+    .chip.active { background: #8B4513; color: white; border-color: #8B4513; }
+    .order { background: white; border-radius: 12px; box-shadow: 0 1px 6px #0001; padding: 14px 16px; margin-bottom: 12px; }
+    .order-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+    .order-id { font-weight: 700; }
+    .order-total { font-weight: 700; color: #8B4513; }
+    .order small, .order .sub { color: #888; font-size: .82rem; }
+    .order ul { margin: 8px 0 8px 18px; font-size: .9rem; }
+    .order .contact { font-size: .88rem; line-height: 1.6; }
+    .order .contact a { color: #25a35a; font-weight: 600; text-decoration: none; }
+    .order-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; border-top: 1px solid #f0e8e0; padding-top: 10px; }
+    .st { display: inline-block; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+    .st-PENDING { background: #fff3e0; color: #b45309; }
+    .st-CONFIRMED { background: #c6f6d5; color: #276749; }
+    .st-SHIPPED { background: #dbeafe; color: #1e40af; }
+    .st-DELIVERED { background: #e9d8fd; color: #553c9a; }
+    .st-CANCELLED { background: #eee; color: #777; }
+    .badge-count { background: #e53e3e; color: white; border-radius: 10px; font-size: .7rem; padding: 1px 7px; margin-left: 4px; }
+    .remember { display: flex; align-items: center; gap: 8px; font-size: .88rem; color: #555; margin-bottom: 14px; cursor: pointer; }
+    .remember input { width: auto; margin: 0; }
+    #install-tip { background: #fff8e1; border: 1px solid #f6d58b; color: #7a5a00; border-radius: 10px; padding: 10px 12px; font-size: .85rem; margin-bottom: 14px; display: none; }
+    #install-tip button { margin-top: 8px; }
+
+    /* Celular: abas fixas embaixo, botões maiores, janelas em tela cheia */
+    @media (max-width: 700px) {
+      header { padding: 12px 14px; padding-top: max(12px, env(safe-area-inset-top)); }
+      header { flex-wrap: nowrap; gap: 10px; }
+      header h1 { font-size: 1rem; white-space: nowrap; }
+      header .btn-sm { min-height: 34px; padding: 4px 10px; }
+      main { margin: 12px auto; padding: 0 12px calc(90px + env(safe-area-inset-bottom)); }
+      nav.tabs { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; margin: 0; background: white;
+                 border-top: 1px solid #ecdccf; border-bottom: none; justify-content: space-around; gap: 0;
+                 padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -2px 10px #0001; }
+      nav.tabs button { position: relative; border-radius: 0; padding: 8px 0 10px; font-size: .64rem; flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; overflow: hidden; text-overflow: ellipsis; }
+      nav.tabs button .badge-count { position: absolute; top: 4px; right: 18%; margin: 0; }
+      .toolbar { gap: 8px; }
+      nav.tabs button .ico { font-size: 1.3rem; }
+      nav.tabs button.active { background: #fdf0e6; color: #8B4513; font-weight: 700; }
+      button, .btn-sm { min-height: 40px; }
+      .toolbar h2 { font-size: 1rem; flex-basis: 100%; }
+      .modal-overlay { padding: 0; align-items: stretch; }
+      .modal { max-width: none; max-height: none; height: 100%; border-radius: 0; padding: 18px 16px calc(24px + env(safe-area-inset-bottom)); }
+      .modal-footer { position: sticky; bottom: 0; background: white; padding-top: 10px; }
+      input, textarea, select { font-size: 16px; } /* evita zoom automático no iPhone */
+      #login-screen { margin: 40px 16px; }
+    }
   </style>
 </head>
 <body>
@@ -81,6 +138,7 @@
   <h2>🧶 Fios MJ Admin</h2>
   <label>Senha de administrador</label>
   <input type="password" id="login-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+  <label class="remember"><input type="checkbox" id="login-remember"/> Manter conectada neste aparelho</label>
   <button class="btn-primary" style="width:100%" onclick="doLogin()">Entrar</button>
   <div id="login-error" class="alert alert-error" style="display:none;margin-top:12px"></div>
 </div>
@@ -88,20 +146,40 @@
 <div id="panel" style="display:none">
   <header>
     <span style="font-size:1.4rem">🧶</span>
-    <h1>Fios MJ — Painel Admin</h1>
-    <a href="/" target="_blank" style="color:#fff;margin-left:auto;font-size:.85rem">Ver site ↗</a>
+    <h1>Painel Fios MJ</h1>
+    <a href="/" target="_blank" rel="noopener" style="color:#fff;margin-left:auto;font-size:.85rem">Ver loja ↗</a>
     <button class="btn-outline btn-sm" onclick="logout()">Sair</button>
   </header>
 
   <main>
     <nav class="tabs">
-      <button data-tab="products" onclick="showTab('products')">🛍️ Produtos</button>
-      <button data-tab="blog" onclick="showTab('blog')">📝 Blog</button>
-      <button data-tab="testimonials" onclick="showTab('testimonials')">💬 Depoimentos</button>
-      <button data-tab="newsletter" onclick="showTab('newsletter')">📧 Newsletter</button>
-      <button data-tab="site" onclick="showTab('site')">⚙️ Site</button>
+      <button data-tab="orders" onclick="showTab('orders')"><span class="ico">📦</span> Pedidos<span id="orders-badge"></span></button>
+      <button data-tab="products" onclick="showTab('products')"><span class="ico">🛍️</span> Produtos</button>
+      <button data-tab="blog" onclick="showTab('blog')"><span class="ico">📝</span> Blog</button>
+      <button data-tab="messages" onclick="showTab('messages')"><span class="ico">💌</span> Mensagens</button>
+      <button data-tab="testimonials" onclick="showTab('testimonials')"><span class="ico">💬</span> Depoim.</button>
+      <button data-tab="newsletter" onclick="showTab('newsletter')"><span class="ico">📧</span> News</button>
+      <button data-tab="site" onclick="showTab('site')"><span class="ico">⚙️</span> Site</button>
     </nav>
+    <div id="install-tip"></div>
     <div id="alert-box" style="display:none"></div>
+
+    <section id="tab-orders" style="display:none">
+      <div class="toolbar">
+        <h2>Pedidos <small id="orders-count" style="color:#888;font-weight:400"></small></h2>
+        <button class="btn-outline btn-sm" onclick="loadOrders()">↻ Atualizar</button>
+      </div>
+      <div class="chips" id="orders-filter"></div>
+      <div id="orders-container"><div class="spinner">Carregando...</div></div>
+    </section>
+
+    <section id="tab-messages" style="display:none">
+      <div class="toolbar">
+        <h2>Mensagens do formulário de contato</h2>
+        <button class="btn-outline btn-sm" onclick="loadMessages()">↻ Atualizar</button>
+      </div>
+      <div id="messages-container"><div class="spinner">Carregando...</div></div>
+    </section>
 
     <section id="tab-products">
       <div class="toolbar">
@@ -266,34 +344,173 @@
     try {
       const r = await fetch('/api/admin/products', { headers: { 'X-Admin-Secret': SECRET } });
       if (!r.ok) throw new Error('Senha incorreta');
-      try { sessionStorage.setItem('fiosmj-admin', SECRET); } catch (_) {}
+      try {
+        const remember = saved ? !!readStored('local') : $('login-remember').checked;
+        if (remember) localStorage.setItem('fiosmj-admin', SECRET); else sessionStorage.setItem('fiosmj-admin', SECRET);
+      } catch (_) {}
       $('login-screen').style.display = 'none';
       $('panel').style.display = 'block';
-      showTab('products');
+      showTab('orders');
+      showInstallTip();
     } catch (e) {
       SECRET = '';
-      try { sessionStorage.removeItem('fiosmj-admin'); } catch (_) {}
+      clearStored();
       if (!saved) { $('login-error').textContent = e.message; $('login-error').style.display = 'block'; }
     }
   }
 
   function logout() {
     SECRET = '';
-    try { sessionStorage.removeItem('fiosmj-admin'); } catch (_) {}
+    clearStored();
     Object.keys(loaded).forEach(k => delete loaded[k]);
     $('panel').style.display = 'none';
     $('login-screen').style.display = 'block';
     $('login-input').value = '';
   }
 
+  function readStored(where) {
+    try { return (where === 'local' ? localStorage : sessionStorage).getItem('fiosmj-admin'); } catch (_) { return null; }
+  }
+  function clearStored() {
+    try { localStorage.removeItem('fiosmj-admin'); } catch (_) {}
+    try { sessionStorage.removeItem('fiosmj-admin'); } catch (_) {}
+  }
+
+  const TABS = ['orders', 'products', 'blog', 'messages', 'testimonials', 'newsletter', 'site'];
   function showTab(tab) {
     document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    ['products', 'blog', 'testimonials', 'newsletter', 'site'].forEach(t => $('tab-' + t).style.display = t === tab ? 'block' : 'none');
+    TABS.forEach(t => $('tab-' + t).style.display = t === tab ? 'block' : 'none');
+    window.scrollTo(0, 0);
     if (!loaded[tab]) {
       loaded[tab] = true;
-      ({ products: loadProducts, blog: loadPosts, testimonials: loadTestimonials, newsletter: loadNewsletter, site: loadSite })[tab]();
+      ({ orders: loadOrders, products: loadProducts, blog: loadPosts, messages: loadMessages,
+         testimonials: loadTestimonials, newsletter: loadNewsletter, site: loadSite })[tab]();
     }
   }
+
+  // ── Pedidos ───────────────────────────────────────────────────────────────
+  const ORDER_STATUS = {
+    PENDING: '⏳ Aguardando pagamento', CONFIRMED: '✅ Pago', SHIPPED: '📬 Enviado',
+    DELIVERED: '🎁 Entregue', CANCELLED: '✖ Cancelado'
+  };
+  const ORDER_FILTERS = [['ACTIVE', 'Para fazer'], ['CONFIRMED', 'Pagos'], ['SHIPPED', 'Enviados'], ['PENDING', 'Aguardando'], ['ALL', 'Todos']];
+  let allOrders = [], orderFilter = 'ACTIVE';
+  const brl = v => 'R$ ' + (Number(v) || 0).toFixed(2).replace('.', ',');
+
+  async function loadOrders() {
+    $('orders-container').innerHTML = '<div class="spinner">Carregando...</div>';
+    try {
+      allOrders = await api('/api/admin/orders');
+      const todo = allOrders.filter(o => o.status === 'CONFIRMED').length;
+      $('orders-badge').innerHTML = todo ? `<span class="badge-count">${todo}</span>` : '';
+      renderOrders();
+    } catch (e) { $('orders-container').innerHTML = ''; fail(e); }
+  }
+
+  function renderOrders() {
+    $('orders-filter').innerHTML = ORDER_FILTERS.map(([k, l]) =>
+      `<button class="chip ${orderFilter === k ? 'active' : ''}" onclick="orderFilter='${k}';renderOrders()">${l}</button>`).join('');
+    const list = allOrders.filter(o => orderFilter === 'ALL' ? true
+      : orderFilter === 'ACTIVE' ? (o.status === 'CONFIRMED' || o.status === 'SHIPPED') : o.status === orderFilter);
+    $('orders-count').textContent = `(${list.length})`;
+    if (!list.length) { $('orders-container').innerHTML = '<div class="empty">Nenhum pedido aqui.</div>'; return; }
+    $('orders-container').innerHTML = list.map(o => {
+      const phone = String(o.phone || '').replace(/\D/g, '');
+      const wa = phone ? `https://wa.me/${phone.length <= 11 ? '55' + phone : phone}?text=${encodeURIComponent(`Olá, ${(o.name || '').split(' ')[0]}! Aqui é da Fios MJ, sobre o seu pedido #${o.id} 🧶`)}` : '';
+      const next = { CONFIRMED: ['SHIPPED', '📬 Marcar enviado'], SHIPPED: ['DELIVERED', '🎁 Marcar entregue'] }[o.status];
+      return `<div class="order">
+        <div class="order-head">
+          <span class="order-id">#${o.id} <span class="st st-${o.status}">${ORDER_STATUS[o.status] || o.status}</span></span>
+          <span class="order-total">${brl(o.totalAmount)}</span>
+        </div>
+        <div class="sub">${formatDateTime(o.createdAt)}${o.hasAccount ? ' · cliente com conta' : ''}</div>
+        <ul>${(o.items || []).map(i => `<li>${i.quantity || 1}× ${esc(i.productName)} — ${brl(i.price)}</li>`).join('')}</ul>
+        <div class="contact">
+          <strong>${esc(o.name || 'Sem nome')}</strong><br/>
+          ${wa ? `<a href="${wa}" target="_blank" rel="noopener">💬 WhatsApp ${esc(o.phone)}</a><br/>` : ''}
+          ${o.email ? esc(o.email) + '<br/>' : ''}
+          ${o.address ? '📍 ' + esc(o.address) : ''}
+        </div>
+        <div class="order-actions">
+          ${next ? `<button class="btn-primary btn-sm" onclick="setOrderStatus(${o.id}, '${next[0]}')">${next[1]}</button>` : ''}
+          ${o.status !== 'CANCELLED' && o.status !== 'DELIVERED' ? `<button class="btn-outline btn-sm" onclick="setOrderStatus(${o.id}, 'CANCELLED')">Cancelar</button>` : ''}
+          ${o.status === 'PENDING' ? `<button class="btn-outline btn-sm" onclick="setOrderStatus(${o.id}, 'CONFIRMED')">Marcar como pago</button>` : ''}
+          ${o.address ? `<button class="btn-outline btn-sm" onclick="copyText(${o.id})">📋 Copiar endereço</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function setOrderStatus(id, status) {
+    if (status === 'CANCELLED' && !confirm(`Cancelar o pedido #${id}? Se já foi pago, o estorno é feito no Mercado Pago.`)) return;
+    if (status === 'CONFIRMED' && !confirm(`Marcar o pedido #${id} como pago? Confira antes no Mercado Pago.`)) return;
+    try {
+      const updated = await api(`/api/admin/orders/${id}/status`, { method: 'POST', json: { status } });
+      allOrders = allOrders.map(o => o.id === id ? updated : o);
+      const todo = allOrders.filter(o => o.status === 'CONFIRMED').length;
+      $('orders-badge').innerHTML = todo ? `<span class="badge-count">${todo}</span>` : '';
+      renderOrders();
+      showAlert(`Pedido #${id}: ${ORDER_STATUS[status]}`);
+    } catch (e) { fail(e); }
+  }
+
+  async function copyText(id) {
+    const o = allOrders.find(x => x.id === id);
+    const text = `${o.name || ''}\n${o.address || ''}\n${o.phone || ''}`;
+    try { await navigator.clipboard.writeText(text); showAlert('Endereço copiado ✅'); }
+    catch (_) { prompt('Copie o endereço:', text.replace(/\n/g, ' · ')); }
+  }
+
+  function formatDateTime(d) {
+    if (!d) return '';
+    const dt = new Date(d);
+    return isNaN(dt) ? '' : dt.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ── Mensagens ─────────────────────────────────────────────────────────────
+  async function loadMessages() {
+    $('messages-container').innerHTML = '<div class="spinner">Carregando...</div>';
+    try {
+      const list = await api('/api/admin/messages');
+      if (!list.length) { $('messages-container').innerHTML = '<div class="empty">Nenhuma mensagem.</div>'; return; }
+      $('messages-container').innerHTML = '<div class="list">' + list.map(m => `
+        <div class="list-row"><div class="grow">
+          <strong>${esc(m.name)}</strong> ${m.email ? `· <a href="mailto:${esc(m.email)}">${esc(m.email)}</a>` : ''}
+          <div style="color:#888;font-size:.8rem">${formatDateTime(m.createdAt)}</div>
+          <p style="margin-top:6px;white-space:pre-wrap">${esc(m.message)}</p>
+        </div>
+        <button class="btn-danger btn-sm" onclick="deleteMessage(${m.id})">🗑️</button></div>`).join('') + '</div>';
+    } catch (e) { $('messages-container').innerHTML = ''; fail(e); }
+  }
+
+  async function deleteMessage(id) {
+    if (!confirm('Apagar esta mensagem?')) return;
+    try { await api(`/api/admin/messages/${id}`, { method: 'DELETE' }); loadMessages(); } catch (e) { fail(e); }
+  }
+
+  // ── Instalar o app no celular ─────────────────────────────────────────────
+  let installEvent = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvent = e; showInstallTip(); });
+  const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  function showInstallTip() {
+    const tip = $('install-tip');
+    if (!tip || isStandalone() || $('panel').style.display === 'none') return;
+    try { if (localStorage.getItem('fiosmj-admin-tip') === 'off') return; } catch (_) {}
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (installEvent) {
+      tip.innerHTML = '📲 Instale o <strong>Painel MJ</strong> no celular para abrir como app.<br/><button class="btn-primary btn-sm" onclick="installApp()">Instalar app</button> <button class="btn-outline btn-sm" onclick="hideTip()">Agora não</button>';
+    } else if (ios) {
+      tip.innerHTML = '📲 Para instalar no iPhone: toque em <strong>Compartilhar</strong> (quadrado com seta) e depois em <strong>Adicionar à Tela de Início</strong>.<br/><button class="btn-outline btn-sm" onclick="hideTip()">Entendi</button>';
+    } else return;
+    tip.style.display = 'block';
+  }
+  async function installApp() {
+    if (!installEvent) return;
+    installEvent.prompt();
+    await installEvent.userChoice.catch(() => {});
+    installEvent = null; hideTip();
+  }
+  function hideTip() { $('install-tip').style.display = 'none'; try { localStorage.setItem('fiosmj-admin-tip', 'off'); } catch (_) {} }
 
   // ── Upload de imagem ──────────────────────────────────────────────────────
   let uploadTarget = null;
@@ -675,8 +892,10 @@
     return isNaN(dt) ? '' : dt.toLocaleDateString('pt-BR');
   }
 
-  // Sessão guardada só nesta aba do navegador
-  try { const s = sessionStorage.getItem('fiosmj-admin'); if (s) doLogin(s); } catch (_) {}
+  // Sessão: "manter conectada" guarda no aparelho; sem isso, só nesta aba
+  $('login-remember').checked = isStandalone();
+  { const s = readStored('local') || readStored('session'); if (s) doLogin(s); }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 </script>
 </body>
 </html>

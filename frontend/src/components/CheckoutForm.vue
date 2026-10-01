@@ -264,41 +264,11 @@ export default {
         const authHeaders = { 'Content-Type': 'application/json' }
         if (token) authHeaders['Authorization'] = `Bearer ${token}`
 
-        // 1. Se logado: criar pedido ANTES da preference para usar o ID como external_reference
-        let orderId = null
-        if (token) {
-          try {
-            const orderPayload = {
-              name: this.form.name, email: this.form.email, phone: this.form.phone,
-              cep: this.form.cep, street: this.form.street, number: this.form.number,
-              complement: this.form.complement, neighborhood: this.form.neighborhood,
-              city: this.form.city, state: this.form.state,
-              totalAmount: this.total,
-              items: this.items.map(i => ({
-                productId: i.product.id,
-                productName: i.product.name + (i.selectedSize ? ` (${i.selectedSize.size})` : ''),
-                price: i.price, quantity: i.quantity,
-                selectedSize: i.selectedSize?.size || null
-              }))
-            }
-            const orderRes = await fetch('/api/orders', {
-              method: 'POST',
-              headers: authHeaders,
-              body: JSON.stringify(orderPayload)
-            })
-            if (orderRes.ok) {
-              const orderData = await orderRes.json()
-              orderId = orderData.id
-            }
-          } catch {}
-        }
-
-        // 2. Criar preference no Mercado Pago (com external_reference = order ID)
-        if (orderId) body.externalReference = `order-${orderId}`
-
+        // O servidor cria o pedido (com ou sem conta) e confere os preços.
+        // Com login, o pedido também aparece no histórico da cliente.
         const res = await fetch('/api/checkout/preference', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders,
           body: JSON.stringify(body)
         })
 
@@ -309,14 +279,6 @@ export default {
 
         const data = await res.json()
         if (data.init_point) {
-          // 3. Atualizar pedido com preferenceId
-          if (token && orderId && data.preference_id) {
-            fetch(`/api/orders/${orderId}/preference`, {
-              method: 'PATCH',
-              headers: authHeaders,
-              body: JSON.stringify({ preferenceId: data.preference_id, initPoint: data.init_point })
-            }).catch(() => {})
-          }
           this.clearCart()
           window.location.href = data.init_point
         } else {

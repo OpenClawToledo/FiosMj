@@ -109,8 +109,15 @@ public class WebhookController {
                         orderOpt = orderRepo.findById(orderId);
                     } catch (NumberFormatException ignored) {}
                 }
+                Object paidRaw = payment.get("transaction_amount");
+                double paid = paidRaw instanceof Number n ? n.doubleValue() : -1;
                 orderOpt.ifPresent(order -> {
-                    if (order.getStatus() != Order.Status.CONFIRMED) {
+                    double expected = order.getTotalAmount() == null ? 0 : order.getTotalAmount();
+                    if (paid >= 0 && paid + 0.01 < expected) {
+                        log.warn("Pedido #{}: valor pago {} menor que o total {} — não confirmado", order.getId(), paid, expected);
+                        return;
+                    }
+                    if (order.getStatus() == Order.Status.PENDING || order.getStatus() == Order.Status.CANCELLED) {
                         order.setStatus(Order.Status.CONFIRMED);
                         orderRepo.save(order);
                         log.info("Pedido #{} confirmado via webhook", order.getId());

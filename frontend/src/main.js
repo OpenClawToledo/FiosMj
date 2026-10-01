@@ -7,6 +7,11 @@ import { initTheme } from './store/theme'
 
 initTheme()
 
+// App instalável: registra o service worker (só no site publicado)
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}))
+}
+
 loadSite().finally(() => {
   const app = createApp(App)
   app.config.globalProperties.$site = site

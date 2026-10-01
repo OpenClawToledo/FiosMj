@@ -57,7 +57,8 @@ public class SecurityConfig {
                     "/produto/*", "/blog/*",
                     "/assets/**", "/img/**", "/uploads/**",
                     "/*.js", "/*.css", "/*.ico", "/*.png", "/*.jpg", "/*.svg",
-                    "/sitemap.xml", "/robots.txt", "/favicon.ico"
+                    "/sitemap.xml", "/robots.txt", "/favicon.ico",
+                    "/*.webmanifest", "/icons/**"
                 ).permitAll()
                 // Rotas autenticadas — cliente
                 .requestMatchers("/api/cart/**", "/api/orders/**", "/api/customers/**").authenticated()

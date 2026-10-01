@@ -7,12 +7,27 @@ Produção: **https://fiosmj.com** · Painel: **https://fiosmj.com/admin**
 
 ---
 
+## Apps no celular
+
+O site vira **dois apps instaláveis**, sem loja de aplicativos:
+
+| App | Endereço | Para quem |
+|---|---|---|
+| **Fios MJ** (loja) | https://fiosmj.com | clientes: ver peças, carrinho e pagamento |
+| **Painel MJ** | https://fiosmj.com/admin | equipe: pedidos, produtos, blog, mensagens, textos |
+
+- **Android (Chrome):** abrir o endereço → aparece "Instalar" (ou menu ⋮ → *Instalar app*).
+- **iPhone (Safari):** Compartilhar → *Adicionar à Tela de Início*.
+- No painel, marque **"Manter conectada neste aparelho"** para não digitar a senha toda vez. Só faça isso no celular pessoal.
+
 ## Painel admin (`/admin`)
 
-Entre com a senha definida em `ADMIN_SECRET`. O painel tem cinco abas:
+Entre com a senha definida em `ADMIN_SECRET`. O painel tem sete abas:
 
 | Aba | O que dá para fazer |
 |---|---|
+| **Pedidos** | todos os pedidos (com ou sem conta da cliente), WhatsApp da cliente, endereço, marcar enviado/entregue/cancelado |
+| **Mensagens** | mensagens do formulário de contato |
 | **Produtos** | criar, editar, ocultar/mostrar, apagar; tamanhos com preço; envio de foto; disponibilidade (pronta entrega, sob encomenda, sob consulta, indisponível) e prazo de produção |
 | **Blog** | criar, editar, publicar/despublicar, apagar posts; capa com envio de foto; texto simples (`## Subtítulo`, `- item`) ou HTML |
 | **Depoimentos** | aprovar, aprovar com destaque ou recusar depoimentos enviados pelas clientes |

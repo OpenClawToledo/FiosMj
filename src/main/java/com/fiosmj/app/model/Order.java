@@ -9,7 +9,7 @@ import java.util.List;
 @Table(name = "orders")
 public class Order {
 
-    public enum Status { PENDING, CONFIRMED, CANCELLED }
+    public enum Status { PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
