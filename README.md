@@ -118,6 +118,24 @@ docker compose up -d
 
 ---
 
+## Mudar de servidor (ex.: Oracle Cloud grátis)
+
+O app roda em Intel/AMD e em ARM. Num Ubuntu novo:
+
+```bash
+# 1. No servidor ANTIGO: gerar backup e levar o .env
+cd /opt/apps/fiosmj && ./scripts/backup.sh
+
+# 2. No servidor NOVO (copie antes o .env antigo para /home/ubuntu/fiosmj.env)
+curl -fsSL https://raw.githubusercontent.com/OpenClawToledo/FiosMj/main/deploy/setup-servidor.sh | sudo bash
+sudo /opt/apps/fiosmj/scripts/restore.sh /home/ubuntu/fiosmj-AAAA-MM-DD_HHMM.tar.gz
+
+# 3. Apontar o domínio para o IP novo e, quando abrir, ativar o HTTPS
+sudo certbot --nginx -d fiosmj.com -d www.fiosmj.com --redirect -m SEU_EMAIL --agree-tos -n
+```
+
+O `setup-servidor.sh` instala Docker, Nginx, Certbot e fail2ban, libera as portas 80/443 (a Oracle bloqueia por padrão), cria swap, baixa o projeto, configura o Nginx, agenda o backup diário e sobe o app.
+
 ## Variáveis de ambiente (`.env`)
 
 | Variável | Obrigatória | Para quê |
