@@ -118,6 +118,62 @@ docker compose up -d
 
 ---
 
+## Rodar num computador de casa (grátis, com Cloudflare Tunnel)
+
+O site fica num notebook/PC ligado 24h e sai para a internet pelo **Cloudflare Tunnel** (grátis): sem abrir portas no roteador e com HTTPS automático. Se faltar luz ou internet em casa, o site sai do ar até voltar.
+
+**Requisitos:** computador 64 bits com 4 GB de RAM ou mais (Linux, Windows 10/11 ou Raspberry Pi 4/5 de 64 bits), ligado na tomada e na internet o tempo todo.
+
+### 1. Cloudflare (uma vez)
+
+1. Crie uma conta grátis em cloudflare.com → **Adicionar domínio** → `fiosmj.com` → plano **Free**.
+2. A Cloudflare mostra **2 nameservers**. No painel da Hostinger: Domínios → fiosmj.com → **Nameservers** → trocar pelos 2 da Cloudflare. Espere ficar "Ativo" (minutos a algumas horas).
+3. Em **DNS → Registros**, apague os registros **A** de `fiosmj.com` e `www` que apontavam para a KVM antiga (mantenha os de e-mail, se houver).
+4. **Zero Trust → Networks → Tunnels → Create a tunnel → Cloudflared**, nome `fiosmj`. Na tela de instalação, copie o **token** (o texto longo depois de `--token`, começa com `eyJ`).
+5. Na aba **Public Hostnames** do túnel, adicione dois:
+   - Domínio `fiosmj.com`, serviço **HTTP**, URL `app:8081`
+   - Subdomínio `www`, domínio `fiosmj.com`, serviço **HTTP**, URL `app:8081`
+6. **SSL/TLS → Edge Certificates → Always Use HTTPS**: ligado.
+
+### 2a. Computador com Linux (Ubuntu, Debian, Mint, Raspberry Pi OS)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/OpenClawToledo/FiosMj/main/deploy/setup-casa.sh | sudo bash
+```
+
+O script instala o Docker, pede a senha do painel, o token do túnel e as chaves do Mercado Pago, impede o computador de hibernar, sobe o site e agenda o backup diário.
+
+### 2b. Computador com Windows 10/11
+
+1. Instale o **Docker Desktop** (docker.com) e o **Git** (git-scm.com). No Docker Desktop: Settings → General → marque **Start Docker Desktop when you sign in**.
+2. Configurações do Windows → Energia → **Suspender: Nunca** (na tomada).
+3. No **PowerShell**:
+   ```powershell
+   cd $HOME
+   git clone https://github.com/OpenClawToledo/FiosMj.git fiosmj
+   cd fiosmj
+   copy .env.example .env
+   notepad .env
+   ```
+4. No `.env`, preencha: `JWT_SECRET` (64 letras/números aleatórios), `ADMIN_SECRET` (senha do painel, 12+ caracteres, sem espaço ou `$`), `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`, `TUNNEL_TOKEN` e acrescente a linha `COMPOSE_FILE=docker-compose.casa.yml`. Salve.
+5. Suba:
+   ```powershell
+   docker compose up -d --build
+   ```
+6. Backup (rode 1 vez por semana e guarde a pasta `backups` no Google Drive):
+   ```powershell
+   mkdir backups -Force; docker run --rm -v fiosmj_data:/data:ro -v ${PWD}\backups:/out alpine tar czf /out/fiosmj-$(Get-Date -f yyyy-MM-dd).tar.gz -C /data .
+   ```
+7. Atualizar depois: `git pull` e `docker compose up -d --build`.
+
+### Conferir
+
+- Neste computador: http://localhost:8081
+- Na internet: https://fiosmj.com e https://fiosmj.com/admin
+- Túnel: `docker compose logs tunnel` deve mostrar "Registered tunnel connection".
+
+Sem Nginx na frente, o próprio app limita tentativas: 10 senhas erradas no painel bloqueiam o IP por 15 minutos, e checkout/contato/cadastro aceitam 10 pedidos por minuto por IP. Num servidor novo com banco vazio, os produtos iniciais são carregados sozinhos.
+
 ## Mudar de servidor (ex.: Oracle Cloud grátis)
 
 O app roda em Intel/AMD e em ARM. Num Ubuntu novo:

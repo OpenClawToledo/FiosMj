@@ -1,0 +1,34 @@
+# Fios MJ rodando num computador de casa (ou qualquer máquina sem IP fixo),
+# publicado na internet pelo Cloudflare Tunnel: sem abrir portas no roteador,
+# HTTPS feito pela Cloudflare.
+#
+# Uso:  docker compose -f docker-compose.casa.yml up -d --build
+# Precisa no .env: JWT_SECRET, ADMIN_SECRET, MP_* e TUNNEL_TOKEN (painel da Cloudflare).
+services:
+  app:
+    build: .
+    image: fiosmj:latest
+    container_name: fiosmj
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Limita a memória do Java para não pesar no computador
+      JAVA_TOOL_OPTIONS: "-Xmx512m -XX:+UseSerialGC"
+    ports:
+      - "127.0.0.1:8081:8081"   # só para testar no próprio computador: http://localhost:8081
+    volumes:
+      - fiosmj_data:/app/data   # banco SQLite + fotos enviadas
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: fiosmj-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?Coloque o TUNNEL_TOKEN da Cloudflare no .env}
+    depends_on:
+      - app
+
+volumes:
+  fiosmj_data:
+    name: fiosmj_data

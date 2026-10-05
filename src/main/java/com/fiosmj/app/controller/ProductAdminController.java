@@ -159,7 +159,8 @@ public class ProductAdminController {
         return ResponseEntity.status(403).body(Map.of("error", "Não autorizado"));
     }
 
-    private List<Product> buildSeeds() {
+    /** Produtos iniciais da loja (também usados no primeiro start de um servidor novo). */
+    public List<Product> buildSeeds() {
         List<Product> list = new ArrayList<>();
 
         list.add(seed(1, "Cropped Halter Brasil 🇧🇷",
