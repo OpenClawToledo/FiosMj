@@ -24,6 +24,9 @@ public class CheckoutController {
     @Value("${mercadopago.access-token}")
     private String accessToken;
 
+    @Value("${site.base-url:https://fiosmj.com}")
+    private String siteUrl;
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final JwtUtil jwtUtil;
     private final CustomerRepository customerRepository;
@@ -102,9 +105,10 @@ public class CheckoutController {
 
             // Build back_urls
             Map<String, String> backUrls = new LinkedHashMap<>();
-            backUrls.put("success", "https://fiosmj.com/obrigado");
-            backUrls.put("failure", "https://fiosmj.com");
-            backUrls.put("pending", "https://fiosmj.com/pendente");
+            String base = siteUrl.replaceAll("/+$", "");
+            backUrls.put("success", base + "/obrigado");
+            backUrls.put("failure", base);
+            backUrls.put("pending", base + "/pendente");
 
             // Build request body
             Map<String, Object> body = new LinkedHashMap<>();
@@ -112,7 +116,7 @@ public class CheckoutController {
             body.put("payer", mpPayer);
             body.put("back_urls", backUrls);
             body.put("auto_return", "approved");
-            body.put("notification_url", "https://fiosmj.com/api/checkout/webhook");
+            body.put("notification_url", base + "/api/checkout/webhook");
             // external_reference: usado pelo webhook para identificar o pedido
             body.put("external_reference", "order-" + order.getId());
 

@@ -1,5 +1,6 @@
 package com.fiosmj.app.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -8,10 +9,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    /** Endereço público configurável (SITE_URL), ex.: domínio provisório. */
+    @Value("${site.base-url:https://fiosmj.com}")
+    private String siteUrl;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
             .allowedOrigins(
+                siteUrl.replaceAll("/+$", ""),
                 "https://fiosmj.com",
                 "https://www.fiosmj.com",
                 "http://localhost:5173",

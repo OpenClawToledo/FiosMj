@@ -38,8 +38,10 @@ public class SeoController {
     private final ProductRepository products;
     private final BlogPostRepository posts;
 
-    @Value("${site.base-url:https://fiosmj.com}")
     private String baseUrl;
+
+    @Value("${site.base-url:https://fiosmj.com}")
+    void setBaseUrl(String v) { this.baseUrl = v.replaceAll("/+$", ""); }
 
     public SeoController(ProductRepository products, BlogPostRepository posts) {
         this.products = products;
