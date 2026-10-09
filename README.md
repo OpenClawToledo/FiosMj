@@ -174,6 +174,49 @@ O script instala o Docker, pede a senha do painel, o token do túnel e as chaves
 
 Sem Nginx na frente, o próprio app limita tentativas: 10 senhas erradas no painel bloqueiam o IP por 15 minutos, e checkout/contato/cadastro aceitam 10 pedidos por minuto por IP. Num servidor novo com banco vazio, os produtos iniciais são carregados sozinhos.
 
+## Rodar num celular Android (ex.: Xiaomi 17T Pro)
+
+Dá para usar um celular Android como servidor, pelo **Termux** (sem Docker) e pelo mesmo **Cloudflare Tunnel** da seção anterior. É a opção mais frágil: o Android pode fechar o app, e o celular fica na tomada 24h. Use como plano B ou temporário. Para a loja de verdade, prefira o Oracle Cloud grátis ou um PC.
+
+**Requisitos:** Android 64 bits com 6 GB de RAM ou mais, Wi-Fi fixo e carregador sempre ligado. iPhone não serve.
+
+### 1. Apps (pelo F-Droid, não pela Play Store)
+
+Instale o **F-Droid** (f-droid.org) e, por ele, o **Termux** e o **Termux:Boot**. Abra o Termux:Boot **uma vez** e depois feche. Isso é o que faz o site voltar sozinho quando o celular reiniciar.
+
+### 2. Cloudflare
+
+Faça os passos de **1. Cloudflare** da seção anterior, com uma diferença: nos dois *Public Hostnames*, a URL do serviço é **`localhost:8081`** (e não `app:8081`). Se o túnel já existia para o PC, só edite os dois hostnames.
+
+### 3. Instalar
+
+No Termux:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/OpenClawToledo/FiosMj/main/deploy/setup-celular.sh | bash
+```
+
+O script instala Java, Node, Maven e cloudflared, pede a senha do painel, o token do túnel e as chaves do Mercado Pago, compila o site **no próprio celular** (de 5 a 15 minutos na primeira vez), cria os serviços que reiniciam sozinhos se caírem e agenda o backup diário. No fim, ele pede permissão de acesso aos arquivos: aceite.
+
+### 4. Ajustes do Xiaomi (HyperOS), obrigatórios
+
+Sem isso, o HyperOS fecha o Termux e o site sai do ar:
+
+1. **Configurações → Apps → Gerenciar apps → Termux**: *Início automático* **ligado** e *Economia de bateria* → **Sem restrições**. Faça o mesmo para o **Termux:Boot**.
+2. **Recentes** (botão quadrado): segure o card do Termux e toque no **cadeado** para travar o app.
+3. Deixe a notificação do Termux aparecendo, com o texto **"wake lock held"**. Se ela sumir, abra o Termux e digite `termux-wake-lock`.
+4. **Opções do desenvolvedor** (Sobre o telefone → toque 7 vezes em *Versão do SO*): ligue **Desativar restrições de processos filhos** (*Disable child process restrictions*). Se não aparecer, deixe como está.
+5. **Bateria**: se houver opção de **limitar a carga em 80%** ou de *carregamento otimizado*, ligue. Isso protege a bateria de estufar com o celular sempre na tomada.
+6. Wi-Fi → rede de casa → **Manter Wi-Fi ligado durante o modo de suspensão: Sempre** (se a opção existir).
+
+### Conferir e manter
+
+- No celular: http://localhost:8081 · Na internet: https://fiosmj.com
+- Registros: `tail -f $PREFIX/var/log/sv/fiosmj/current` (site) e `tail -f $PREFIX/var/log/sv/fiosmj-tunnel/current` (túnel)
+- Reiniciar o site: `sv restart fiosmj`
+- **Atualizar:** rode de novo `bash ~/fiosmj/deploy/setup-celular.sh`
+- **Backup:** sai todo dia às 03:15 em *Armazenamento interno/FiosMJ-backups* (30 dias). Configure o Google Drive (ou outro) para copiar essa pasta, porque, se o celular for perdido ou quebrar, os pedidos e as clientes vão junto. O arquivo tem o mesmo formato dos outros backups, e o `scripts/restore.sh` restaura num servidor normal.
+
 ## Mudar de servidor (ex.: Oracle Cloud grátis)
 
 O app roda em Intel/AMD e em ARM. Num Ubuntu novo:
